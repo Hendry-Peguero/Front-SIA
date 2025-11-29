@@ -55,5 +55,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    touch-action: pan-y;              /* Solo scroll vertical */
+    -webkit-user-select: none;        /* Prevenir selección de texto */
+    user-select: none;
+  }
+  
+  input, textarea {
+    -webkit-user-select: text;        /* Permitir selección en inputs */
+    user-select: text;
   }
 }

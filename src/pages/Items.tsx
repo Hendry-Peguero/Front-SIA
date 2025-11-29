@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useInventory } from '../context/InventoryContext';
-import { InventoryMovementDto, InventoryMovementSaveDto } from '../types/inventory.types';
-import MovementTable from '../components/inventory/MovementTable';
-import MovementForm from '../components/inventory/MovementForm';
-import DeleteConfirmation from '../components/inventory/DeleteConfirmation';
-import MovementDetail from '../components/inventory/MovementDetail';
+import { useItems } from '../context/ItemContext';
+import { ItemInformationDto, SaveItemInformationDto } from '../types/item.types';
+import ItemTable from '../components/items/ItemTable';
+import ItemForm from '../components/items/ItemForm';
+import DeleteItemConfirmation from '../components/items/DeleteItemConfirmation';
+import ItemDetail from '../components/items/ItemDetail';
 import { Modal } from '../components/ui/modal';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -12,50 +12,50 @@ import { Plus, RefreshCw } from 'lucide-react';
 
 type ModalState = 'create' | 'edit' | 'delete' | 'view' | null;
 
-const Movements: React.FC = () => {
-    const { movements, loading, createMovement, updateMovement, deleteMovement, fetchMovements } = useInventory();
+const Items: React.FC = () => {
+    const { items, loading, createItem, updateItem, deleteItem, fetchItems } = useItems();
     const [modalState, setModalState] = useState<ModalState>(null);
-    const [selectedMovement, setSelectedMovement] = useState<InventoryMovementDto | null>(null);
+    const [selectedItem, setSelectedItem] = useState<ItemInformationDto | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
 
     const handleCreate = () => {
-        setSelectedMovement(null);
+        setSelectedItem(null);
         setModalState('create');
     };
 
-    const handleEdit = (movement: InventoryMovementDto) => {
-        setSelectedMovement(movement);
+    const handleEdit = (item: ItemInformationDto) => {
+        setSelectedItem(item);
         setModalState('edit');
     };
 
-    const handleDelete = (movementId: number) => {
-        const movement = movements.find((m) => m.movementId === movementId);
-        if (movement) {
-            setSelectedMovement(movement);
+    const handleDelete = (itemId: number) => {
+        const item = items.find((i) => i.itemId === itemId);
+        if (item) {
+            setSelectedItem(item);
             setModalState('delete');
         }
     };
 
-    const handleView = (movement: InventoryMovementDto) => {
-        setSelectedMovement(movement);
+    const handleView = (item: ItemInformationDto) => {
+        setSelectedItem(item);
         setModalState('view');
     };
 
-    const handleSubmitCreate = async (data: InventoryMovementSaveDto) => {
+    const handleSubmitCreate = async (data: SaveItemInformationDto) => {
         setActionLoading(true);
         try {
-            await createMovement(data);
+            await createItem(data);
             setModalState(null);
         } finally {
             setActionLoading(false);
         }
     };
 
-    const handleSubmitEdit = async (data: InventoryMovementSaveDto) => {
-        if (!selectedMovement) return;
+    const handleSubmitEdit = async (data: SaveItemInformationDto) => {
+        if (!selectedItem) return;
         setActionLoading(true);
         try {
-            await updateMovement(selectedMovement.movementId, data);
+            await updateItem(selectedItem.itemId, data);
             setModalState(null);
         } finally {
             setActionLoading(false);
@@ -63,10 +63,10 @@ const Movements: React.FC = () => {
     };
 
     const handleConfirmDelete = async () => {
-        if (!selectedMovement) return;
+        if (!selectedItem) return;
         setActionLoading(true);
         try {
-            await deleteMovement(selectedMovement.movementId);
+            await deleteItem(selectedItem.itemId);
             setModalState(null);
         } finally {
             setActionLoading(false);
@@ -76,7 +76,7 @@ const Movements: React.FC = () => {
     const handleCloseModal = () => {
         if (!actionLoading) {
             setModalState(null);
-            setSelectedMovement(null);
+            setSelectedItem(null);
         }
     };
 
@@ -84,34 +84,34 @@ const Movements: React.FC = () => {
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Movimientos de Inventario</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Artículos</h1>
                     <p className="text-muted-foreground mt-1">
-                        Gestiona todos los movimientos de inventario
+                        Gestiona el catálogo de artículos del inventario
                     </p>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
                     <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => fetchMovements()}
+                        onClick={() => fetchItems()}
                         disabled={loading}
                     >
                         <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                     </Button>
                     <Button onClick={handleCreate} className="flex-1 md:flex-none">
                         <Plus className="h-4 w-4 mr-2" />
-                        Nuevo Movimiento
+                        Nuevo Artículo
                     </Button>
                 </div>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Lista de Movimientos</CardTitle>
+                    <CardTitle>Lista de Artículos</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <MovementTable
-                        movements={movements}
+                    <ItemTable
+                        items={items}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onView={handleView}
@@ -124,10 +124,10 @@ const Movements: React.FC = () => {
             <Modal
                 isOpen={modalState === 'create'}
                 onClose={handleCloseModal}
-                title="Nuevo Movimiento"
-                description="Completa el formulario para crear un nuevo movimiento de inventario"
+                title="Nuevo Artículo"
+                description="Completa el formulario para agregar un nuevo artículo al inventario"
             >
-                <MovementForm
+                <ItemForm
                     onSubmit={handleSubmitCreate}
                     onCancel={handleCloseModal}
                     loading={actionLoading}
@@ -138,14 +138,14 @@ const Movements: React.FC = () => {
             <Modal
                 isOpen={modalState === 'edit'}
                 onClose={handleCloseModal}
-                title="Editar Movimiento"
-                description="Modifica los datos del movimiento"
+                title="Editar Artículo"
+                description="Modifica los datos del artículo"
             >
-                {selectedMovement && (
-                    <MovementForm
+                {selectedItem && (
+                    <ItemForm
                         onSubmit={handleSubmitEdit}
                         onCancel={handleCloseModal}
-                        initialData={selectedMovement}
+                        initialData={selectedItem}
                         loading={actionLoading}
                     />
                 )}
@@ -157,9 +157,10 @@ const Movements: React.FC = () => {
                 onClose={handleCloseModal}
                 title=""
             >
-                {selectedMovement && (
-                    <DeleteConfirmation
-                        movementId={selectedMovement.movementId}
+                {selectedItem && (
+                    <DeleteItemConfirmation
+                        itemId={selectedItem.itemId}
+                        itemName={selectedItem.itemName}
                         onConfirm={handleConfirmDelete}
                         onCancel={handleCloseModal}
                         loading={actionLoading}
@@ -173,10 +174,10 @@ const Movements: React.FC = () => {
                 onClose={handleCloseModal}
                 title=""
             >
-                {selectedMovement && <MovementDetail movement={selectedMovement} />}
+                {selectedItem && <ItemDetail item={selectedItem} onClose={handleCloseModal} />}
             </Modal>
         </div>
     );
 };
 
-export default Movements;
+export default Items;

@@ -49,7 +49,7 @@ const Dashboard: React.FC = () => {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Sistema de Inventario</h1>
                 <p className="text-muted-foreground mt-1">
                     Resumen del sistema de inventario
                 </p>

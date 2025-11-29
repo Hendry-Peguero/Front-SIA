@@ -1,7 +1,22 @@
 import axios, { AxiosError } from 'axios';
 
-// Get API base URL from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Get API base URL from environment variables or current hostname
+const getApiBaseUrl = () => {
+    // Si hay variable de entorno, úsala
+    if (import.meta.env.VITE_API_URL) {
+        return import.meta.env.VITE_API_URL;
+    }
+
+    // Si estamos en localhost, usa localhost
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:5037/api';
+    }
+
+    // Si estamos en red, usa la misma IP que el frontend
+    return `http://${window.location.hostname}:5037/api`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Create axios instance with base configuration
 const apiClient = axios.create({

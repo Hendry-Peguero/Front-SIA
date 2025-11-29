@@ -1,8 +1,9 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Package, ShoppingBag, Menu, X, LogOut } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/button';
+import { Modal } from '../ui/modal';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -10,15 +11,34 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = React.useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const username = localStorage.getItem('username') || 'Usuario';
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+    const handleLogoutClick = () => {
+        setIsLogoutModalOpen(true);
+    };
+
+    const confirmLogout = () => {
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('username');
+        navigate('/login');
+    };
 
     const navItems = [
         {
             label: 'Dashboard',
             href: '/',
             icon: LayoutDashboard,
+        },
+        {
+            label: 'Artículos',
+            href: '/items',
+            icon: ShoppingBag,
         },
         {
             label: 'Movimientos',
@@ -31,23 +51,41 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="min-h-screen bg-background flex flex-col">
             {/* Header */}
             <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container flex h-16 items-center">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="mr-2 md:hidden"
-                        onClick={toggleSidebar}
-                    >
-                        <Menu className="h-5 w-5" />
-                        <span className="sr-only">Toggle Menu</span>
-                    </Button>
-                    <div className="mr-4 flex">
-                        <Link to="/" className="mr-6 flex items-center space-x-2">
-                            <Package className="h-6 w-6 text-primary" />
-                            <span className="hidden font-bold sm:inline-block">
-                                WebApiSIA
-                            </span>
-                        </Link>
+                <div className="container flex h-16 items-center justify-between">
+                    <div className="flex items-center">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="mr-2 md:hidden"
+                            onClick={toggleSidebar}
+                        >
+                            <Menu className="h-5 w-5" />
+                            <span className="sr-only">Toggle Menu</span>
+                        </Button>
+                        <div className="mr-4 flex">
+                            <Link to="/" className="mr-6 flex items-center space-x-2">
+                                <Package className="h-6 w-6 text-primary" />
+                                <span className="hidden font-bold sm:inline-block">
+                                    Sistema de Inventario
+                                </span>
+                            </Link>
+                        </div>
+                    </div>
+
+                    {/* User Info and Logout */}
+                    <div className="flex items-center gap-2">
+                        <span className="hidden sm:inline text-sm text-muted-foreground">
+                            {username}
+                        </span>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleLogoutClick}
+                            className="gap-2"
+                        >
+                            <LogOut className="h-4 w-4" />
+                            <span className="hidden sm:inline">Cerrar Sesión</span>
+                        </Button>
                     </div>
                 </div>
             </header>
@@ -79,7 +117,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <div className="flex items-center justify-between mb-6">
                                 <Link to="/" className="flex items-center space-x-2" onClick={toggleSidebar}>
                                     <Package className="h-6 w-6" />
-                                    <span className="font-bold">WebApiSIA</span>
+                                    <span className="font-bold">Sistema de Inventario</span>
                                 </Link>
                                 <Button variant="ghost" size="icon" onClick={toggleSidebar}>
                                     <X className="h-5 w-5" />
@@ -110,6 +148,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     {children}
                 </main>
             </div>
+
+            {/* Logout Confirmation Modal */}
+            <Modal
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                title="Cerrar Sesión"
+                description="¿Seguro que quiere cerrar sesión?"
+            >
+                <div className="flex justify-end gap-3 pt-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsLogoutModalOpen(false)}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        variant="destructive"
+                        onClick={confirmLogout}
+                    >
+                        Cerrar Sesión
+                    </Button>
+                </div>
+            </Modal>
         </div>
     );
 };

@@ -11,6 +11,7 @@ export default defineConfig({
         },
     },
     server: {
+        host: '0.0.0.0', // Allow access from any device on the network
         port: 5175,
     },
 })

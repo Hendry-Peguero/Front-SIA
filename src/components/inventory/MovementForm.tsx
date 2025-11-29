@@ -42,7 +42,6 @@ const MovementForm: React.FC<MovementFormProps> = ({
                 quantity: 0,
                 movementDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
                 reason: '',
-                createdBy: 1,
             },
     });
 
@@ -53,7 +52,7 @@ const MovementForm: React.FC<MovementFormProps> = ({
             quantity: Number(data.quantity),
             movementDate: new Date(data.movementDate as string).toISOString(),
             reason: data.reason || null,
-            createdBy: Number(data.createdBy),
+            createdBy: 1, // Auto-set to user ID 1
         };
 
         await onSubmit(saveDto);
@@ -146,23 +145,6 @@ const MovementForm: React.FC<MovementFormProps> = ({
                     />
                     {errors.reason && (
                         <p className="text-sm text-destructive">{errors.reason.message}</p>
-                    )}
-                </div>
-
-                {/* Created By */}
-                <div className="space-y-2">
-                    <Label htmlFor="createdBy">
-                        ID de Usuario <span className="text-destructive">*</span>
-                    </Label>
-                    <Input
-                        id="createdBy"
-                        type="number"
-                        {...register('createdBy')}
-                        placeholder="Ejemplo: 1"
-                        disabled={loading}
-                    />
-                    {errors.createdBy && (
-                        <p className="text-sm text-destructive">{errors.createdBy.message}</p>
                     )}
                 </div>
             </div>
