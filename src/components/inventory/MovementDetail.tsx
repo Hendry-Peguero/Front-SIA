@@ -3,7 +3,7 @@ import { InventoryMovementDto } from '../../types/inventory.types';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { formatDate, formatNumber, getMovementTypeColor, getMovementTypeLabel } from '../../utils/formatters';
 import { cn } from '../../utils/cn';
-import { Package, Calendar, User, FileText, Hash } from 'lucide-react';
+import { Package, Calendar, FileText, Hash } from 'lucide-react';
 
 interface MovementDetailProps {
     movement: InventoryMovementDto;
