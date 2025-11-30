@@ -4,33 +4,36 @@ import { Mail, Lock, Package } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { useAuth } from '../context/AuthContext';
 
 const Login: React.FC = () => {
-    const [email, setEmail] = useState('');
+    const [userName, setUserName] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
 
-        // Credenciales hardcodeadas
-        const VALID_USERNAME = 'Soporte';
-        const VALID_PASSWORD = 'As@@@@@12345';
-
-        setTimeout(() => {
-            if (email === VALID_USERNAME && password === VALID_PASSWORD) {
-                localStorage.setItem('isAuthenticated', 'true');
-                localStorage.setItem('username', email);
-                navigate('/');
-            } else {
+        try {
+            await login({ userName, password });
+            navigate('/'); // Redirect to dashboard after successful login
+        } catch (err: any) {
+            console.error('Login error:', err);
+            if (err.response?.status === 401) {
                 setError('Usuario o contraseña incorrectos');
+            } else if (err.response?.status === 500) {
+                setError('Error del servidor. Por favor, intente más tarde');
+            } else {
+                setError('Error de conexión. Verifique su red');
             }
+        } finally {
             setIsLoading(false);
-        }, 500);
+        }
     };
 
     return (
@@ -48,17 +51,17 @@ const Login: React.FC = () => {
 
                     {/* Login Form */}
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Email/Username Input */}
+                        {/* Username Input */}
                         <div className="space-y-2">
-                            <Label htmlFor="email">Usuario</Label>
+                            <Label htmlFor="userName">Usuario</Label>
                             <div className="relative">
                                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 <Input
-                                    id="email"
+                                    id="userName"
                                     type="text"
                                     placeholder="Ingrese su usuario"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    value={userName}
+                                    onChange={(e) => setUserName(e.target.value)}
                                     className="pl-10"
                                     required
                                     autoComplete="username"
@@ -104,6 +107,7 @@ const Login: React.FC = () => {
                     {/* Footer Info */}
                     <div className="mt-6 text-center text-sm text-gray-500">
                         <p>Sistema de Inventario v1.0</p>
+                        <p className="mt-1 text-xs">Autenticación JWT</p>
                     </div>
                 </div>
             </div>

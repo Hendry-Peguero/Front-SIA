@@ -7,12 +7,16 @@ const getApiBaseUrl = () => {
         return import.meta.env.VITE_API_URL;
     }
 
-    // Si estamos en localhost, usa localhost
+    // En desarrollo, usar path relativo para que funcione el proxy de Vite
+    if (import.meta.env.DEV) {
+        return '/api';
+    }
+
+    // En producción o red local, intentar determinar la URL
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         return 'http://localhost:5037/api';
     }
 
-    // Si estamos en red, usa la misma IP que el frontend
     return `http://${window.location.hostname}:5037/api`;
 };
 
@@ -27,14 +31,13 @@ const apiClient = axios.create({
     timeout: 10000, // 10 second timeout
 });
 
-// Request interceptor
+// Request interceptor - Add JWT token to all requests
 apiClient.interceptors.request.use(
     (config) => {
-        // Add any auth headers if needed
-        // const token = localStorage.getItem('token');
-        // if (token) {
-        //   config.headers.Authorization = `Bearer ${token}`;
-        // }
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
         return config;
     },
     (error) => {
@@ -42,7 +45,7 @@ apiClient.interceptors.request.use(
     }
 );
 
-// Response interceptor
+// Response interceptor - Handle errors and token expiration
 apiClient.interceptors.response.use(
     (response) => {
         return response;
@@ -52,6 +55,15 @@ apiClient.interceptors.response.use(
         if (error.response) {
             // Server responded with error status
             console.error('API Error:', error.response.status, error.response.data);
+
+            // Handle 401 Unauthorized - Token expired or invalid
+            if (error.response.status === 401) {
+                console.warn('Authentication failed - redirecting to login');
+                localStorage.removeItem('token');
+                localStorage.removeItem('userName');
+                // Redirect to login page
+                window.location.href = '/login';
+            }
         } else if (error.request) {
             // Request made but no response
             console.error('Network Error: No response from server');

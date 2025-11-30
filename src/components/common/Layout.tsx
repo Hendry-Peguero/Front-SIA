@@ -4,6 +4,7 @@ import { LayoutDashboard, Package, ShoppingBag, Menu, X, LogOut } from 'lucide-r
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/button';
 import { Modal } from '../ui/modal';
+import { useAuth } from '../../context/AuthContext';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -14,8 +15,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const [isLogoutModalOpen, setIsLogoutModalOpen] = React.useState(false);
     const location = useLocation();
     const navigate = useNavigate();
-
-    const username = localStorage.getItem('username') || 'Usuario';
+    const { userName, logout } = useAuth();
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -24,8 +24,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     };
 
     const confirmLogout = () => {
-        localStorage.removeItem('isAuthenticated');
-        localStorage.removeItem('username');
+        logout();
         navigate('/login');
     };
 
@@ -75,7 +74,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     {/* User Info and Logout */}
                     <div className="flex items-center gap-2">
                         <span className="hidden sm:inline text-sm text-muted-foreground">
-                            {username}
+                            {userName || 'Usuario'}
                         </span>
                         <Button
                             variant="ghost"
