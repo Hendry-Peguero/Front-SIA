@@ -25,11 +25,6 @@ export const movementSchema = z.object({
         .max(500, "La razón no puede exceder los 500 caracteres")
         .optional()
         .nullable(),
-
-    createdBy: z.coerce
-        .number({ invalid_type_error: "El ID de usuario debe ser un número" })
-        .int("El ID de usuario debe ser un entero")
-        .positive("El ID de usuario debe ser positivo"),
 });
 
 export type MovementFormValues = z.infer<typeof movementSchema>;

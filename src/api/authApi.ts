@@ -21,6 +21,7 @@ export const authApi = {
     logout: () => {
         localStorage.removeItem('token');
         localStorage.removeItem('userName');
+        localStorage.removeItem('userId');
     },
 
     /**
@@ -52,5 +53,33 @@ export const authApi = {
      */
     getToken: (): string | null => {
         return localStorage.getItem('token');
+    },
+
+    /**
+     * Get current user ID from localStorage or token
+     */
+    getUserId: (): number | null => {
+        // First try to get from localStorage (set during login)
+        const storedId = localStorage.getItem('userId');
+        if (storedId) {
+            return Number(storedId);
+        }
+
+        // Fallback: try to extract from token
+        const token = localStorage.getItem('token');
+        if (!token) return null;
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            // ASP.NET uses full claim URIs
+            const nameIdentifier = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+
+            // Fallback to short forms if full URI not found
+            const userId = nameIdentifier ?? payload.nameid ?? payload.sub ?? payload.uid;
+
+            return userId ? Number(userId) : null;
+        } catch {
+            return null;
+        }
     },
 };

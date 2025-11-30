@@ -3,10 +3,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { movementSchema, type MovementFormValues } from '../../utils/validators';
 import { InventoryMovementDto, InventoryMovementSaveDto } from '../../types/inventory.types';
+import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { format } from 'date-fns';
+import { getItems } from '../../api/itemApi';
+import { ItemInformationDto } from '../../types/item.types';
+import { useToast } from '../../context/ToastContext';
 
 interface MovementFormProps {
     onSubmit: (data: InventoryMovementSaveDto) => Promise<void>;
@@ -21,10 +25,66 @@ const MovementForm: React.FC<MovementFormProps> = ({
     initialData,
     loading = false,
 }) => {
+    const { userId } = useAuth();
+    const { addToast } = useToast();
+    const [items, setItems] = React.useState<ItemInformationDto[]>([]);
+    const [loadingItems, setLoadingItems] = React.useState(false);
+    const [searchTerm, setSearchTerm] = React.useState('');
+    const [showDropdown, setShowDropdown] = React.useState(false);
+
+    // Debug: Log userId cuando cambia
+    React.useEffect(() => {
+        console.log('MovementForm - Current userId:', userId);
+        console.log('MovementForm - localStorage userId:', localStorage.getItem('userId'));
+        console.log('MovementForm - localStorage token:', localStorage.getItem('token') ? 'EXISTS' : 'NOT FOUND');
+
+        // Debug: Show token payload
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                console.log('🔍 TOKEN PAYLOAD:', payload);
+                console.log('Available fields in token:', Object.keys(payload));
+            } catch (e) {
+                console.error('Failed to decode token:', e);
+            }
+        }
+    }, [userId]);
+
+    React.useEffect(() => {
+        const fetchItems = async () => {
+            setLoadingItems(true);
+            try {
+                const data = await getItems();
+                setItems(data);
+            } catch (error) {
+                console.error('Error fetching items:', error);
+            } finally {
+                setLoadingItems(false);
+            }
+        };
+        fetchItems();
+    }, []);
+
+    const filteredItems = React.useMemo(() => {
+        if (!searchTerm) return items;
+        return items.filter(item =>
+            item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.itemId.toString().includes(searchTerm)
+        );
+    }, [items, searchTerm]);
+
+    const handleItemSelect = (item: ItemInformationDto) => {
+        setSearchTerm(item.itemName);
+        setShowDropdown(false);
+        setValue('itemId', item.itemId);
+    };
+
     const {
         register,
         handleSubmit,
         formState: { errors },
+        setValue,
     } = useForm<MovementFormValues>({
         resolver: zodResolver(movementSchema),
         defaultValues: initialData
@@ -34,47 +94,88 @@ const MovementForm: React.FC<MovementFormProps> = ({
                 quantity: initialData.quantity,
                 movementDate: format(new Date(initialData.movementDate), "yyyy-MM-dd'T'HH:mm"),
                 reason: initialData.reason || '',
-                createdBy: initialData.createdBy,
             }
             : {
-                itemId: 0,
                 movementType: 'entrada',
-                quantity: 0,
+                quantity: 1,
                 movementDate: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
                 reason: '',
             },
     });
 
     const onFormSubmit = async (data: MovementFormValues) => {
+        console.log('Form data received:', data);
+        console.log('Current userId:', userId);
+
+        if (!userId) {
+            console.error('No user ID available. Please re-login.');
+            addToast('No hay usuario autenticado. Por favor, cierra sesión e inicia sesión nuevamente.', 'error');
+            return;
+        }
+
+        if (!data.itemId || data.itemId === 0) {
+            console.error('No item selected');
+            addToast('Por favor, selecciona un producto válido.', 'error');
+            return;
+        }
+
         const saveDto: InventoryMovementSaveDto = {
             itemId: Number(data.itemId),
             movementType: data.movementType,
             quantity: Number(data.quantity),
             movementDate: new Date(data.movementDate as string).toISOString(),
             reason: data.reason || null,
-            createdBy: 1, // Auto-set to user ID 1
+            createdBy: userId,
         };
 
+        console.log('Submitting movement data:', saveDto);
         await onSubmit(saveDto);
     };
 
     return (
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
             <div className="grid gap-4">
-                {/* Item ID */}
+                {/* Item Selection with Search */}
                 <div className="space-y-2">
-                    <Label htmlFor="itemId">
-                        ID del Producto <span className="text-destructive">*</span>
+                    <Label htmlFor="itemSearch">
+                        Producto <span className="text-destructive">*</span>
                     </Label>
-                    <Input
-                        id="itemId"
-                        type="number"
-                        {...register('itemId')}
-                        placeholder="Ejemplo: 1001"
-                        disabled={loading}
-                    />
+                    <div className="relative">
+                        <Input
+                            id="itemSearch"
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                setShowDropdown(true);
+                            }}
+                            onFocus={() => setShowDropdown(true)}
+                            placeholder="Buscar producto por nombre o ID..."
+                            disabled={loading || loadingItems}
+                        />
+                        <input type="hidden" {...register('itemId')} />
+                        {showDropdown && filteredItems.length > 0 && (
+                            <div className="absolute z-10 w-full mt-1 bg-background border border-input rounded-md shadow-lg max-h-60 overflow-auto">
+                                {filteredItems.map((item) => (
+                                    <div
+                                        key={item.itemId}
+                                        onClick={() => handleItemSelect(item)}
+                                        className="px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                                    >
+                                        <div className="font-medium">{item.itemName}</div>
+                                        <div className="text-xs text-muted-foreground">ID: {item.itemId}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                     {errors.itemId && (
                         <p className="text-sm text-destructive">{errors.itemId.message}</p>
+                    )}
+                    {items.length === 0 && !loadingItems && (
+                        <p className="text-xs text-muted-foreground">
+                            No hay productos disponibles. Crea uno primero.
+                        </p>
                     )}
                 </div>
 

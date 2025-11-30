@@ -105,10 +105,7 @@ const Login: React.FC = () => {
                     </form>
 
                     {/* Footer Info */}
-                    <div className="mt-6 text-center text-sm text-gray-500">
-                        <p>Sistema de Inventario v1.0</p>
-                        <p className="mt-1 text-xs">Autenticación JWT</p>
-                    </div>
+
                 </div>
             </div>
         </div>

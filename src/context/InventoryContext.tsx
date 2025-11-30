@@ -52,6 +52,9 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             setMovements((prev) => [newMovement, ...prev]);
             addToast('Movimiento creado exitosamente', 'success');
         } catch (err: any) {
+            console.error('Error creating movement:', err);
+            console.error('Error response:', err.response);
+            console.error('Error data:', err.response?.data);
             const msg = err.response?.data?.message || err.message || 'Error al crear movimiento';
             addToast(msg, 'error');
             throw err;

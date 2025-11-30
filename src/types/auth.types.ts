@@ -6,8 +6,8 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-    userName: string;
     token: string;
+    userName: string;
 }
 
 export interface DecodedToken {
