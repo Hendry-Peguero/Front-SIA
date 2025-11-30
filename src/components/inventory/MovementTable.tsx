@@ -100,10 +100,7 @@ const MovementTable: React.FC<MovementTableProps> = ({
                                         <span className="text-muted-foreground text-[10px]">Cantidad: </span>
                                         <span className="font-medium text-primary">{formatNumber(movement.quantity)}</span>
                                     </div>
-                                    <div>
-                                        <span className="text-muted-foreground text-[10px]">Creado: </span>
-                                        <span className="font-medium">{movement.createdBy}</span>
-                                    </div>
+
                                 </div>
 
                                 {/* Full Width - Reason */}
@@ -130,7 +127,7 @@ const MovementTable: React.FC<MovementTableProps> = ({
                             <th className="p-2 text-right text-xs font-medium">Cantidad</th>
                             <th className="p-2 text-left text-xs font-medium">Fecha</th>
                             <th className="p-2 text-left text-xs font-medium">Razón</th>
-                            <th className="p-2 text-left text-xs font-medium">Creado por</th>
+
                             <th className="p-2 text-center text-xs font-medium">Acciones</th>
                         </tr>
                     </thead>
@@ -156,7 +153,7 @@ const MovementTable: React.FC<MovementTableProps> = ({
                                 <td className="p-2 text-xs text-muted-foreground max-w-xs truncate">
                                     {movement.reason || '-'}
                                 </td>
-                                <td className="p-2 text-xs">{movement.createdBy}</td>
+
                                 <td className="p-2">
                                     <div className="flex items-center justify-center gap-1">
                                         <Button

@@ -76,11 +76,7 @@ const MovementDetail: React.FC<MovementDetailProps> = ({ movement }) => {
                         value={movement.reason || <span className="text-muted-foreground italic">Sin razón especificada</span>}
                     />
 
-                    <DetailRow
-                        icon={<User className="h-5 w-5" />}
-                        label="Creado por (User ID)"
-                        value={movement.createdBy}
-                    />
+
                 </div>
             </CardContent>
         </Card>
