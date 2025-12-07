@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingBag, Menu, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Menu, X, LogOut, Folder, Percent } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/button';
 import { Modal } from '../ui/modal';
@@ -43,6 +43,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             label: 'Movimientos',
             href: '/movements',
             icon: Package,
+        },
+        {
+            label: 'Grupos de Artículos',
+            href: '/catalogs/item-groups',
+            icon: Folder,
+        },
+        {
+            label: 'Tipos de Impuestos',
+            href: '/catalogs/vat',
+            icon: Percent,
         },
     ];
 

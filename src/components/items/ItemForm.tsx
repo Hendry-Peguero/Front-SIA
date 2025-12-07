@@ -9,7 +9,10 @@ import { Label } from '../ui/label';
 import { Modal } from '../ui/modal';
 import { Scan } from 'lucide-react';
 import BarcodeScanner from './BarcodeScanner';
-import { GRUPOS_MOCK, ALMACENES_MOCK, VAT_MOCK, UNIDADES_MEDIDA_MOCK } from '../../data/mockData';
+import { ALMACENES_MOCK, UNIDADES_MEDIDA_MOCK } from '../../data/mockData';
+import { getItemGroups, ItemGroupDto } from '../../api/itemGroupApi';
+import { getVats, VatDto } from '../../api/vatApi';
+import { useToast } from '../../context/ToastContext';
 
 interface ItemFormProps {
     onSubmit: (data: SaveItemInformationDto) => Promise<void>;
@@ -26,6 +29,10 @@ const ItemForm: React.FC<ItemFormProps> = ({
 }) => {
     const [showScanner, setShowScanner] = useState(false);
     const [scanningField, setScanningField] = useState<'barcode' | 'barcode2' | 'barcode3'>('barcode');
+    const [groups, setGroups] = useState<ItemGroupDto[]>([]);
+    const [vats, setVats] = useState<VatDto[]>([]);
+    const [catalogsLoading, setCatalogsLoading] = useState(true);
+    const { addToast } = useToast();
 
     const {
         register,
@@ -63,6 +70,28 @@ const ItemForm: React.FC<ItemFormProps> = ({
                 margen: 0,
             },
     });
+
+    // Load catalogs from API
+    useEffect(() => {
+        const loadCatalogs = async () => {
+            try {
+                setCatalogsLoading(true);
+                const [groupsData, vatsData] = await Promise.all([
+                    getItemGroups(),
+                    getVats(),
+                ]);
+                setGroups(groupsData);
+                setVats(vatsData);
+            } catch (error: any) {
+                console.error('Error al cargar catálogos:', error);
+                addToast('Error al cargar grupos e impuestos', 'error');
+            } finally {
+                setCatalogsLoading(false);
+            }
+        };
+
+        loadCatalogs();
+    }, [addToast]);
 
     // Watch cost and margen to auto-calculate price
     const cost = watch('cost');
@@ -155,13 +184,15 @@ const ItemForm: React.FC<ItemFormProps> = ({
                         <select
                             id="groupId"
                             {...register('groupId', { valueAsNumber: true })}
-                            disabled={loading}
+                            disabled={loading || catalogsLoading}
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            <option value="">Seleccionar grupo...</option>
-                            {GRUPOS_MOCK.map((grupo) => (
-                                <option key={grupo.id} value={grupo.id}>
-                                    {grupo.nombre}
+                            <option value="">
+                                {catalogsLoading ? 'Cargando...' : 'Seleccionar grupo...'}
+                            </option>
+                            {groups.map((group) => (
+                                <option key={group.GROUP_ID} value={group.GROUP_ID}>
+                                    {group.GROUP_NAME}
                                 </option>
                             ))}
                         </select>
@@ -437,13 +468,15 @@ const ItemForm: React.FC<ItemFormProps> = ({
                         <select
                             id="vatId"
                             {...register('vatId', { valueAsNumber: true })}
-                            disabled={loading}
+                            disabled={loading || catalogsLoading}
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            <option value="">Seleccionar VAT...</option>
-                            {VAT_MOCK.map((vat) => (
-                                <option key={vat.id} value={vat.id}>
-                                    {vat.nombre} ({vat.tasa}%)
+                            <option value="">
+                                {catalogsLoading ? 'Cargando...' : 'Seleccionar VAT...'}
+                            </option>
+                            {vats.map((vat) => (
+                                <option key={vat.ID} value={vat.ID}>
+                                    {vat.Descripcion} ({vat.Vat}%)
                                 </option>
                             ))}
                         </select>

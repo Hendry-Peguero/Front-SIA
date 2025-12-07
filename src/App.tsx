@@ -4,6 +4,8 @@ import Layout from './components/common/Layout';
 import Dashboard from './pages/Dashboard';
 import Movements from './pages/Movements';
 import Items from './pages/Items';
+import ItemGroupList from './pages/ItemGroups';
+import VatList from './pages/Vat';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import { ToastProvider } from './context/ToastContext';
@@ -33,6 +35,8 @@ function App() {
                                                     <Route path="/" element={<Dashboard />} />
                                                     <Route path="/movements" element={<Movements />} />
                                                     <Route path="/items" element={<Items />} />
+                                                    <Route path="/catalogs/item-groups" element={<ItemGroupList />} />
+                                                    <Route path="/catalogs/vat" element={<VatList />} />
                                                     <Route path="*" element={<NotFound />} />
                                                 </Routes>
                                             </Layout>
