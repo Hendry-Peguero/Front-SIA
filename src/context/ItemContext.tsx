@@ -64,7 +64,7 @@ export const ItemProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(true);
         try {
             const updatedItem = await itemApi.updateItem(id, data);
-            setItems((prev) => prev.map((item) => (item.itemId === id ? updatedItem : item)));
+            setItems((prev) => prev.map((item) => (item.iteM_ID === id ? updatedItem : item)));
             addToast('Artículo actualizado exitosamente', 'success');
         } catch (err: any) {
             const msg = err.response?.data?.message || err.message || 'Error al actualizar artículo';
@@ -79,7 +79,7 @@ export const ItemProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(true);
         try {
             await itemApi.deleteItem(id);
-            setItems((prev) => prev.filter((item) => item.itemId !== id));
+            setItems((prev) => prev.filter((item) => item.iteM_ID !== id));
             addToast('Artículo eliminado exitosamente', 'success');
         } catch (err: any) {
             const msg = err.response?.data?.message || err.message || 'Error al eliminar artículo';
@@ -92,7 +92,7 @@ export const ItemProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const getItemById = useCallback(async (id: number) => {
         // First try to find in local state
-        const existing = items.find((item) => item.itemId === id);
+        const existing = items.find((item) => item.iteM_ID === id);
         if (existing) return existing;
 
         // If not found, fetch from API

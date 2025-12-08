@@ -45,21 +45,21 @@ const MovementTable: React.FC<MovementTableProps> = ({
             {/* Mobile View: Cards */}
             <div className="sm:hidden space-y-2 w-full overflow-x-hidden">
                 {movements.map((movement) => (
-                    <Card key={movement.movementId} className="p-3 w-full">
+                    <Card key={movement.movement_ID} className="p-3 w-full">
                         <div className="space-y-2">
                             {/* Header Row: ID + Badge + Actions */}
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs font-medium text-muted-foreground">
-                                        ID: {movement.movementId}
+                                        ID: {movement.movement_ID}
                                     </span>
                                     <span
                                         className={cn(
                                             "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border",
-                                            getMovementTypeColor(movement.movementType)
+                                            getMovementTypeColor(movement.movement_Type)
                                         )}
                                     >
-                                        {getMovementTypeLabel(movement.movementType)}
+                                        {getMovementTypeLabel(movement.movement_Type)}
                                     </span>
                                 </div>
                                 <div className="flex gap-1">
@@ -72,7 +72,7 @@ const MovementTable: React.FC<MovementTableProps> = ({
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => onDelete(movement.movementId)}
+                                        onClick={() => onDelete(movement.movement_ID)}
                                         className="h-6 w-6 p-0 text-destructive hover:text-destructive"
                                     >
                                         <Trash2 className="h-3 w-3" />
@@ -86,11 +86,11 @@ const MovementTable: React.FC<MovementTableProps> = ({
                                 <div className="space-y-1">
                                     <div>
                                         <span className="text-muted-foreground text-[10px]">Producto: </span>
-                                        <span className="font-medium text-primary">#{movement.itemId}</span>
+                                        <span className="font-medium text-primary">#{movement.iteM_ID}</span>
                                     </div>
                                     <div>
                                         <span className="text-muted-foreground text-[10px]">Fecha: </span>
-                                        <span className="font-medium">{formatDate(movement.movementDate)}</span>
+                                        <span className="font-medium">{formatDate(movement.movement_Date)}</span>
                                     </div>
                                 </div>
 
@@ -133,23 +133,23 @@ const MovementTable: React.FC<MovementTableProps> = ({
                     </thead>
                     <tbody>
                         {movements.map((movement) => (
-                            <tr key={movement.movementId} className="border-b hover:bg-muted/30 transition-colors">
-                                <td className="p-2 text-xs font-medium">{movement.movementId}</td>
-                                <td className="p-2 text-xs">{movement.itemId}</td>
+                            <tr key={movement.movement_ID} className="border-b hover:bg-muted/30 transition-colors">
+                                <td className="p-2 text-xs font-medium">{movement.movement_ID}</td>
+                                <td className="p-2 text-xs">{movement.iteM_ID}</td>
                                 <td className="p-2">
                                     <span
                                         className={cn(
                                             "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border",
-                                            getMovementTypeColor(movement.movementType)
+                                            getMovementTypeColor(movement.movement_Type)
                                         )}
                                     >
-                                        {getMovementTypeLabel(movement.movementType)}
+                                        {getMovementTypeLabel(movement.movement_Type)}
                                     </span>
                                 </td>
                                 <td className="p-2 text-xs text-right font-mono">
                                     {formatNumber(movement.quantity)}
                                 </td>
-                                <td className="p-2 text-xs">{formatDate(movement.movementDate)}</td>
+                                <td className="p-2 text-xs">{formatDate(movement.movement_Date)}</td>
                                 <td className="p-2 text-xs text-muted-foreground max-w-xs truncate">
                                     {movement.reason || '-'}
                                 </td>
@@ -177,7 +177,7 @@ const MovementTable: React.FC<MovementTableProps> = ({
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() => onDelete(movement.movementId)}
+                                            onClick={() => onDelete(movement.movement_ID)}
                                             title="Eliminar"
                                             className="h-7 w-7 p-0 text-destructive hover:text-destructive"
                                         >

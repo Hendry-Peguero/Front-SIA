@@ -47,3 +47,11 @@ export const updateItem = async (
 export const deleteItem = async (id: number): Promise<void> => {
     await apiClient.delete(`/ItemInformation/${id}`);
 };
+
+/**
+ * Get item by barcode
+ */
+export const getItemByBarcode = async (barcode: string): Promise<ItemInformationDto> => {
+    const response = await apiClient.get<ItemInformationDto>(`/ItemInformation/barcode/${barcode}`);
+    return response.data;
+};

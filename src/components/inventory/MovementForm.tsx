@@ -8,9 +8,10 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { format } from 'date-fns';
-import { getItems } from '../../api/itemApi';
+import { getItems, getItemByBarcode } from '../../api/itemApi';
 import { ItemInformationDto } from '../../types/item.types';
 import { useToast } from '../../context/ToastContext';
+import { Scan } from 'lucide-react';
 
 interface MovementFormProps {
     onSubmit: (data: InventoryMovementSaveDto) => Promise<void>;
@@ -31,6 +32,21 @@ const MovementForm: React.FC<MovementFormProps> = ({
     const [loadingItems, setLoadingItems] = React.useState(false);
     const [searchTerm, setSearchTerm] = React.useState('');
     const [showDropdown, setShowDropdown] = React.useState(false);
+    const searchContainerRef = React.useRef<HTMLDivElement>(null);
+
+    // Handle click outside to close dropdown
+    React.useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+                setShowDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     // Debug: Log userId cuando cambia
     React.useEffect(() => {
@@ -70,14 +86,45 @@ const MovementForm: React.FC<MovementFormProps> = ({
         if (!searchTerm) return items;
         return items.filter(item =>
             item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.itemId.toString().includes(searchTerm)
+            item.iteM_ID.toString().includes(searchTerm) ||
+            item.barcode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.barcode2?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.barcode3?.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [items, searchTerm]);
 
     const handleItemSelect = (item: ItemInformationDto) => {
         setSearchTerm(item.itemName);
         setShowDropdown(false);
-        setValue('itemId', item.itemId);
+        setValue('itemId', item.iteM_ID);
+    };
+
+    const handleBarcodeSearch = async (barcode: string) => {
+        if (!barcode.trim()) return;
+
+        try {
+            const item = await getItemByBarcode(barcode);
+            if (item && item.iteM_ID) {
+                handleItemSelect(item);
+                addToast('Producto encontrado', 'success');
+                setSearchTerm(item.itemName); // Update input with item name
+            } else {
+                addToast('Producto no encontrado con este código de barras', 'error');
+            }
+        } catch (error) {
+            console.error('Error searching by barcode:', error);
+            // Don't show error toast for every simple search attempt (optional UX decision)
+            // or perform a name filter fallback here if desired
+            addToast('Producto no encontrado', 'error');
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent form submission
+            // Try barcode search primarily on Enter
+            handleBarcodeSearch(searchTerm);
+        }
     };
 
     const {
@@ -89,10 +136,10 @@ const MovementForm: React.FC<MovementFormProps> = ({
         resolver: zodResolver(movementSchema),
         defaultValues: initialData
             ? {
-                itemId: initialData.itemId,
-                movementType: initialData.movementType,
+                itemId: initialData.iteM_ID,
+                movementType: initialData.movement_Type as 'entrada' | 'salida' | 'ajuste',
                 quantity: initialData.quantity,
-                movementDate: format(new Date(initialData.movementDate), "yyyy-MM-dd'T'HH:mm"),
+                movementDate: format(new Date(initialData.movement_Date), "yyyy-MM-dd'T'HH:mm"),
                 reason: initialData.reason || '',
             }
             : {
@@ -120,10 +167,10 @@ const MovementForm: React.FC<MovementFormProps> = ({
         }
 
         const saveDto: InventoryMovementSaveDto = {
-            itemId: Number(data.itemId),
-            movementType: data.movementType,
+            iteM_ID: Number(data.itemId),
+            movement_Type: data.movementType,
             quantity: Number(data.quantity),
-            movementDate: new Date(data.movementDate as string).toISOString(),
+            movement_Date: new Date(data.movementDate as string).toISOString(),
             reason: data.reason || null,
             createdBy: userId,
         };
@@ -135,48 +182,69 @@ const MovementForm: React.FC<MovementFormProps> = ({
     return (
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
             <div className="grid gap-4">
-                {/* Item Selection with Search */}
-                <div className="space-y-2">
-                    <Label htmlFor="itemSearch">
-                        Producto <span className="text-destructive">*</span>
-                    </Label>
-                    <div className="relative">
-                        <Input
-                            id="itemSearch"
-                            type="text"
-                            value={searchTerm}
-                            onChange={(e) => {
-                                setSearchTerm(e.target.value);
-                                setShowDropdown(true);
-                            }}
-                            onFocus={() => setShowDropdown(true)}
-                            placeholder="Buscar producto por nombre o ID..."
-                            disabled={loading || loadingItems}
-                        />
-                        <input type="hidden" {...register('itemId')} />
-                        {showDropdown && filteredItems.length > 0 && (
-                            <div className="absolute z-10 w-full mt-1 bg-background border border-input rounded-md shadow-lg max-h-60 overflow-auto">
-                                {filteredItems.map((item) => (
-                                    <div
-                                        key={item.itemId}
-                                        onClick={() => handleItemSelect(item)}
-                                        className="px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
-                                    >
-                                        <div className="font-medium">{item.itemName}</div>
-                                        <div className="text-xs text-muted-foreground">ID: {item.itemId}</div>
-                                    </div>
-                                ))}
-                            </div>
+                <div className="space-y-4">
+                    {/* Unified Item Search */}
+                    <div className="space-y-2" ref={searchContainerRef}>
+                        <Label htmlFor="itemSearch">
+                            Producto / Código de Barras <span className="text-destructive">*</span>
+                        </Label>
+                        <div className="relative flex gap-2">
+                            <Input
+                                id="itemSearch"
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    setShowDropdown(true);
+                                }}
+                                onKeyDown={handleKeyDown}
+                                onFocus={() => setShowDropdown(true)}
+                                placeholder="Escanear código o buscar por nombre..."
+                                disabled={loading || loadingItems}
+                                className="flex-1"
+                                autoComplete="off"
+                            />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleBarcodeSearch(searchTerm)}
+                                disabled={loading || !searchTerm}
+                                title="Buscar por código de barras"
+                            >
+                                <Scan className="h-4 w-4" />
+                            </Button>
+
+                            <input type="hidden" {...register('itemId')} />
+
+                            {showDropdown && searchTerm && filteredItems.length > 0 && (
+                                <div className="absolute z-10 w-full top-full mt-1 bg-background border border-input rounded-md shadow-lg max-h-60 overflow-auto">
+                                    {filteredItems.slice(0, 50).map((item) => (
+                                        <div
+                                            key={item.iteM_ID}
+                                            onClick={() => handleItemSelect(item)}
+                                            className="px-3 py-2 cursor-pointer hover:bg-accent hover:text-accent-foreground border-b last:border-0"
+                                        >
+                                            <div className="font-medium">{item.itemName}</div>
+                                            <div className="flex justify-between text-xs text-muted-foreground">
+                                                <span>ID: {item.iteM_ID}</span>
+                                                <span>Stock: {item.barcode}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        {errors.itemId && (
+                            <p className="text-sm text-destructive">{errors.itemId.message}</p>
+                        )}
+                        {items.length === 0 && !loadingItems && (
+                            <p className="text-xs text-muted-foreground">
+                                No hay productos disponibles. Crea uno primero.
+                            </p>
                         )}
                     </div>
-                    {errors.itemId && (
-                        <p className="text-sm text-destructive">{errors.itemId.message}</p>
-                    )}
-                    {items.length === 0 && !loadingItems && (
-                        <p className="text-xs text-muted-foreground">
-                            No hay productos disponibles. Crea uno primero.
-                        </p>
-                    )}
+
                 </div>
 
                 {/* Movement Type */}
@@ -264,7 +332,7 @@ const MovementForm: React.FC<MovementFormProps> = ({
                     {loading ? 'Guardando...' : initialData ? 'Actualizar' : 'Crear'}
                 </Button>
             </div>
-        </form>
+        </form >
     );
 };
 

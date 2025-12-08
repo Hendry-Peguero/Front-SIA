@@ -44,16 +44,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             href: '/movements',
             icon: Package,
         },
-        {
-            label: 'Grupos de Artículos',
-            href: '/catalogs/item-groups',
-            icon: Folder,
-        },
-        {
-            label: 'Tipos de Impuestos',
-            href: '/catalogs/vat',
-            icon: Percent,
-        },
+
     ];
 
     return (

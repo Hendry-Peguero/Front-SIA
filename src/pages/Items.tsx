@@ -29,7 +29,7 @@ const Items: React.FC = () => {
     };
 
     const handleDelete = (itemId: number) => {
-        const item = items.find((i) => i.itemId === itemId);
+        const item = items.find((i) => i.iteM_ID === itemId);
         if (item) {
             setSelectedItem(item);
             setModalState('delete');
@@ -55,7 +55,7 @@ const Items: React.FC = () => {
         if (!selectedItem) return;
         setActionLoading(true);
         try {
-            await updateItem(selectedItem.itemId, data);
+            await updateItem(selectedItem.iteM_ID, data);
             setModalState(null);
         } finally {
             setActionLoading(false);
@@ -66,7 +66,7 @@ const Items: React.FC = () => {
         if (!selectedItem) return;
         setActionLoading(true);
         try {
-            await deleteItem(selectedItem.itemId);
+            await deleteItem(selectedItem.iteM_ID);
             setModalState(null);
         } finally {
             setActionLoading(false);
@@ -111,7 +111,7 @@ const Items: React.FC = () => {
                 </CardHeader>
                 <CardContent className="p-0">
                     <ItemTable
-                        items={items}
+                        items={[...items].sort((a, b) => b.iteM_ID - a.iteM_ID)}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onView={handleView}
@@ -159,7 +159,7 @@ const Items: React.FC = () => {
             >
                 {selectedItem && (
                     <DeleteItemConfirmation
-                        itemId={selectedItem.itemId}
+                        itemId={selectedItem.iteM_ID}
                         itemName={selectedItem.itemName}
                         onConfirm={handleConfirmDelete}
                         onCancel={handleCloseModal}

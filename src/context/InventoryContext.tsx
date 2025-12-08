@@ -67,7 +67,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(true);
         try {
             const updatedMovement = await inventoryApi.update(id, data);
-            setMovements((prev) => prev.map((m) => (m.movementId === id ? updatedMovement : m)));
+            setMovements((prev) => prev.map((m) => (m.movement_ID === id ? updatedMovement : m)));
             addToast('Movimiento actualizado exitosamente', 'success');
         } catch (err: any) {
             const msg = err.response?.data?.message || err.message || 'Error al actualizar movimiento';
@@ -82,7 +82,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setLoading(true);
         try {
             await inventoryApi.delete(id);
-            setMovements((prev) => prev.filter((m) => m.movementId !== id));
+            setMovements((prev) => prev.filter((m) => m.movement_ID !== id));
             addToast('Movimiento eliminado exitosamente', 'success');
         } catch (err: any) {
             const msg = err.response?.data?.message || err.message || 'Error al eliminar movimiento';
@@ -95,7 +95,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     const getMovementById = useCallback(async (id: number) => {
         // First try to find in local state
-        const existing = movements.find((m) => m.movementId === id);
+        const existing = movements.find((m) => m.movement_ID === id);
         if (existing) return existing;
 
         // If not found, fetch from API

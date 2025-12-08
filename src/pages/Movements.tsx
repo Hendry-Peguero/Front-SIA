@@ -29,7 +29,7 @@ const Movements: React.FC = () => {
     };
 
     const handleDelete = (movementId: number) => {
-        const movement = movements.find((m) => m.movementId === movementId);
+        const movement = movements.find((m) => m.movement_ID === movementId);
         if (movement) {
             setSelectedMovement(movement);
             setModalState('delete');
@@ -55,7 +55,7 @@ const Movements: React.FC = () => {
         if (!selectedMovement) return;
         setActionLoading(true);
         try {
-            await updateMovement(selectedMovement.movementId, data);
+            await updateMovement(selectedMovement.movement_ID, data);
             setModalState(null);
         } finally {
             setActionLoading(false);
@@ -66,7 +66,7 @@ const Movements: React.FC = () => {
         if (!selectedMovement) return;
         setActionLoading(true);
         try {
-            await deleteMovement(selectedMovement.movementId);
+            await deleteMovement(selectedMovement.movement_ID);
             setModalState(null);
         } finally {
             setActionLoading(false);
@@ -159,7 +159,7 @@ const Movements: React.FC = () => {
             >
                 {selectedMovement && (
                     <DeleteConfirmation
-                        movementId={selectedMovement.movementId}
+                        movementId={selectedMovement.movement_ID}
                         onConfirm={handleConfirmDelete}
                         onCancel={handleCloseModal}
                         loading={actionLoading}

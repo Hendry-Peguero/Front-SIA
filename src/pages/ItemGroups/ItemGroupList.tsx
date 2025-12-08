@@ -116,14 +116,14 @@ const ItemGroupList: React.FC = () => {
                             <tbody className="bg-background divide-y">
                                 {groups.map((group) => (
                                     <tr
-                                        key={group.GROUP_ID}
+                                        key={group.grouP_ID}
                                         className="hover:bg-muted/50 transition-colors"
                                     >
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                            {group.GROUP_ID}
+                                            {group.grouP_ID}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            {group.GROUP_NAME}
+                                            {group.grouP_NAME}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center text-sm">
                                             <div className="flex items-center justify-center gap-2">

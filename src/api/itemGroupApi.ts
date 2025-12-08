@@ -9,16 +9,16 @@ import apiClient from './axiosConfig';
  * ItemGroupDto - Response type from API
  */
 export interface ItemGroupDto {
-    GROUP_ID: number;
-    GROUP_NAME: string;
+    grouP_ID: number;
+    grouP_NAME: string;
 }
 
 /**
  * SaveItemGroupDto - Request type for create/update (for future use)
  */
 export interface SaveItemGroupDto {
-    GroupId: number;
-    GroupName: string;
+    grouP_ID: number;
+    grouP_NAME: string;
 }
 
 /**

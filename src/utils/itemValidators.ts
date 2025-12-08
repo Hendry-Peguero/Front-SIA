@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 /**
  * Zod schema for item form validation
+ * "All fields can be null except name"
  */
 export const itemSchema = z.object({
     itemName: z
@@ -11,8 +12,9 @@ export const itemSchema = z.object({
 
     unitOfMeasure: z
         .string()
-        .min(1, 'La unidad de medida es requerida')
-        .max(200, 'La unidad no puede exceder 200 caracteres'),
+        .max(200, 'La unidad no puede exceder 200 caracteres')
+        .optional()
+        .default(''),
 
     batch: z
         .string()
@@ -22,8 +24,10 @@ export const itemSchema = z.object({
 
     groupId: z
         .number()
-        .int('El ID del grupo debe ser un número entero')
-        .min(0, 'El ID del grupo debe ser mayor o igual a 0'),
+        .int()
+        .min(0)
+        .optional()
+        .default(0),
 
     barcode: z
         .string()
@@ -33,79 +37,90 @@ export const itemSchema = z.object({
 
     autoGenerateBarcode: z
         .boolean()
+        .optional()
         .default(false),
 
     cost: z
         .number()
-        .min(0, 'El costo debe ser mayor o igual a 0'),
+        .min(0)
+        .optional()
+        .default(0),
 
     price: z
         .number()
-        .min(0, 'El precio debe ser mayor o igual a 0'),
+        .min(0)
+        .optional()
+        .default(0),
 
     price2: z
         .number()
-        .min(0, 'El precio 2 debe ser mayor o igual a 0')
+        .min(0)
+        .optional()
         .default(0),
 
     price3: z
         .number()
-        .min(0, 'El precio 3 debe ser mayor o igual a 0')
+        .min(0)
+        .optional()
         .default(0),
 
     reorderPoint: z
         .number()
-        .min(0, 'El punto de pedido debe ser mayor o igual a 0')
+        .min(0)
+        .optional()
         .default(0),
 
     vatApplicable: z
-        .string()
-        .max(10, 'VAT aplicable no puede exceder 10 caracteres')
-        .default(''),
+        .boolean()
+        .optional()
+        .default(false),
 
     warehouseId: z
         .number()
-        .int('El ID del almacén debe ser un número entero')
-        .min(0, 'El ID del almacén debe ser mayor o igual a 0'),
+        .int()
+        .min(0)
+        .optional()
+        .default(0),
 
     photoFileName: z
         .string()
-        .max(200, 'El nombre del archivo no puede exceder 200 caracteres')
+        .max(200)
+        .optional()
         .default(''),
 
     barcode2: z
         .string()
-        .max(255, 'El código de barras 2 no puede exceder 255 caracteres')
+        .max(255)
+        .optional()
         .default(''),
 
     barcode3: z
         .string()
-        .max(255, 'El código de barras 3 no puede exceder 255 caracteres')
+        .max(255)
+        .optional()
         .default(''),
 
     comment: z
         .string()
+        .optional()
         .default(''),
 
     vatId: z
         .number()
-        .int('El ID del VAT debe ser un número entero')
-        .min(0, 'El ID del VAT debe ser mayor o igual a 0')
+        .int()
+        .min(0)
+        .optional()
         .default(0),
 
     allowDecimal: z
         .boolean()
+        .optional()
         .default(false),
 
     margen: z
         .number()
-        .min(0, 'El margen debe ser mayor o igual a 0')
-        .max(100, 'El margen no puede exceder 100%')
+        .min(0)
+        .optional()
         .default(0),
-}).refine(
-    (data) => data.price >= data.cost,
-    {
-        message: 'El precio de venta debe ser mayor o igual al costo',
-        path: ['price'],
-    }
-);
+});
+// Removed .refine(price >= cost) to strictly follow "all optional" request if cost is 0 and price is 0

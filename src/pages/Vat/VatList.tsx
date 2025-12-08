@@ -122,18 +122,18 @@ const VatList: React.FC = () => {
                             <tbody className="bg-background divide-y">
                                 {vats.map((vat) => (
                                     <tr
-                                        key={vat.ID}
+                                        key={vat.id}
                                         className="hover:bg-muted/50 transition-colors"
                                     >
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                            {vat.ID}
+                                            {vat.id}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            {vat.Descripcion}
+                                            {vat.descripcion}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
                                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                                {vat.Vat}%
+                                                {vat.vat}%
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-center text-sm">

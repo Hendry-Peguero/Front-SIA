@@ -67,8 +67,8 @@ const ItemTable: React.FC<ItemTableProps> = ({
                     </thead>
                     <tbody>
                         {items.map((item) => (
-                            <tr key={item.itemId} className="border-b hover:bg-muted/50">
-                                <td className="p-4">{item.itemId}</td>
+                            <tr key={item.iteM_ID} className="border-b hover:bg-muted/50">
+                                <td className="p-4">{item.iteM_ID}</td>
                                 <td className="p-4 font-medium">{item.itemName}</td>
                                 <td className="p-4">{item.unitOfMeasure}</td>
                                 <td className="p-4">
@@ -80,7 +80,7 @@ const ItemTable: React.FC<ItemTableProps> = ({
                                 <td className="p-4 font-semibold text-primary">
                                     ${item.price.toFixed(2)}
                                 </td>
-                                <td className="p-4">{getGroupName(item.groupId)}</td>
+                                <td className="p-4">{getGroupName(item.grouP_ID)}</td>
                                 <td className="p-4">
                                     <div className="flex gap-2">
                                         <Button
@@ -102,7 +102,7 @@ const ItemTable: React.FC<ItemTableProps> = ({
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            onClick={() => onDelete(item.itemId)}
+                                            onClick={() => onDelete(item.iteM_ID)}
                                             title="Eliminar"
                                             className="text-destructive hover:text-destructive"
                                         >
@@ -120,13 +120,13 @@ const ItemTable: React.FC<ItemTableProps> = ({
             <div className="md:hidden space-y-4 p-4">
                 {items.map((item) => (
                     <div
-                        key={item.itemId}
+                        key={item.iteM_ID}
                         className="border rounded-lg p-4 space-y-3 hover:shadow-md transition-shadow"
                     >
                         <div className="flex justify-between items-start">
                             <div>
                                 <h3 className="font-semibold">{item.itemName}</h3>
-                                <p className="text-sm text-muted-foreground">ID: {item.itemId}</p>
+                                <p className="text-sm text-muted-foreground">ID: {item.iteM_ID}</p>
                             </div>
                             <span className="text-lg font-bold text-primary">
                                 ${item.price.toFixed(2)}
@@ -150,7 +150,7 @@ const ItemTable: React.FC<ItemTableProps> = ({
                             </div>
                             <div>
                                 <span className="text-muted-foreground">Grupo:</span>
-                                <p className="font-medium">{getGroupName(item.groupId)}</p>
+                                <p className="font-medium">{getGroupName(item.grouP_ID)}</p>
                             </div>
                         </div>
 
@@ -176,7 +176,7 @@ const ItemTable: React.FC<ItemTableProps> = ({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => onDelete(item.itemId)}
+                                onClick={() => onDelete(item.iteM_ID)}
                                 className="flex-1 text-destructive hover:text-destructive"
                             >
                                 <Trash2 className="h-4 w-4 mr-1" />

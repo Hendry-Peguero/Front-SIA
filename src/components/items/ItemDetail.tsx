@@ -31,7 +31,7 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
             <div className="flex justify-between items-start border-b pb-4">
                 <div>
                     <h2 className="text-2xl font-bold">{item.itemName}</h2>
-                    <p className="text-muted-foreground">ID: {item.itemId}</p>
+                    <p className="text-muted-foreground">ID: {item.iteM_ID}</p>
                 </div>
                 {onClose && (
                     <Button variant="ghost" size="icon" onClick={onClose}>
@@ -61,7 +61,7 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
                     </div>
                     <div>
                         <p className="text-sm text-muted-foreground">Grupo</p>
-                        <p className="font-medium">{getGroupName(item.groupId)}</p>
+                        <p className="font-medium">{getGroupName(item.grouP_ID)}</p>
                     </div>
                     <div>
                         <p className="text-sm text-muted-foreground">Permite Decimales</p>
@@ -141,15 +141,15 @@ const ItemDetail: React.FC<ItemDetailProps> = ({ item, onClose }) => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-muted/50 p-4 rounded-lg">
                     <div>
                         <p className="text-sm text-muted-foreground">Almacén</p>
-                        <p className="font-medium">{getWarehouseName(item.warehouseId)}</p>
+                        <p className="font-medium">{getWarehouseName(item.warehouseID)}</p>
                     </div>
                     <div>
                         <p className="text-sm text-muted-foreground">VAT</p>
-                        <p className="font-medium">{getVATName(item.vatId)}</p>
+                        <p className="font-medium">{getVATName(item.vaT_ID)}</p>
                     </div>
                     <div>
                         <p className="text-sm text-muted-foreground">ITBIS</p>
-                        <p className="font-medium">{item.vatApplicable || 'N/A'}</p>
+                        <p className="font-medium">{item.vaT_Applicable || 'N/A'}</p>
                     </div>
                 </div>
             </div>

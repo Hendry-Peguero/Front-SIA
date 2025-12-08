@@ -9,17 +9,17 @@ import apiClient from './axiosConfig';
  * VatDto - Response type from API
  */
 export interface VatDto {
-    ID: number;
-    Descripcion: string;
-    Vat: number; // Percentage value
+    id: number;
+    descripcion: string;
+    vat: number; // Percentage value
 }
 
 /**
  * SaveVatDto - Request type for create/update (for future use)
  */
 export interface SaveVatDto {
-    Descripcion: string;
-    Vat: number;
+    descripcion: string;
+    vat: number;
 }
 
 /**

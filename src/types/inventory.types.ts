@@ -8,11 +8,11 @@ export type MovementType = 'entrada' | 'salida' | 'ajuste';
  * Used for displaying existing movements
  */
 export interface InventoryMovementDto {
-    movementId: number;
-    itemId: number;
-    movementType: string;
+    movement_ID: number;
+    iteM_ID: number;
+    movement_Type: string;
     quantity: number;
-    movementDate: string; // ISO 8601 DateTime
+    movement_Date: string; // ISO 8601 DateTime
     reason?: string | null;
     createdBy: number;
 }
@@ -22,10 +22,10 @@ export interface InventoryMovementDto {
  * Used for creating and updating movements
  */
 export interface InventoryMovementSaveDto {
-    itemId: number;
-    movementType: string;
+    iteM_ID: number;
+    movement_Type: string;
     quantity: number;
-    movementDate: string; // ISO 8601 DateTime
+    movement_Date: string; // ISO 8601 DateTime
     reason?: string | null;
     createdBy: number;
 }

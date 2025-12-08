@@ -27,20 +27,20 @@ const MovementDetail: React.FC<MovementDetailProps> = ({ movement }) => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Detalle del Movimiento #{movement.movementId}</CardTitle>
+                <CardTitle>Detalle del Movimiento #{movement.movement_ID}</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="space-y-1">
                     <DetailRow
                         icon={<Hash className="h-5 w-5" />}
                         label="ID del Movimiento"
-                        value={movement.movementId}
+                        value={movement.movement_ID}
                     />
 
                     <DetailRow
                         icon={<Package className="h-5 w-5" />}
                         label="ID del Producto"
-                        value={movement.itemId}
+                        value={movement.iteM_ID}
                     />
 
                     <DetailRow
@@ -50,10 +50,10 @@ const MovementDetail: React.FC<MovementDetailProps> = ({ movement }) => {
                             <span
                                 className={cn(
                                     "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border",
-                                    getMovementTypeColor(movement.movementType)
+                                    getMovementTypeColor(movement.movement_Type)
                                 )}
                             >
-                                {getMovementTypeLabel(movement.movementType)}
+                                {getMovementTypeLabel(movement.movement_Type)}
                             </span>
                         }
                     />
@@ -67,7 +67,7 @@ const MovementDetail: React.FC<MovementDetailProps> = ({ movement }) => {
                     <DetailRow
                         icon={<Calendar className="h-5 w-5" />}
                         label="Fecha del Movimiento"
-                        value={formatDate(movement.movementDate)}
+                        value={formatDate(movement.movement_Date)}
                     />
 
                     <DetailRow

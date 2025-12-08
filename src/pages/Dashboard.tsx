@@ -9,9 +9,9 @@ const Dashboard: React.FC = () => {
     const { movements } = useInventory();
     const navigate = useNavigate();
 
-    const entradas = movements.filter((m) => m.movementType.toLowerCase() === 'entrada');
-    const salidas = movements.filter((m) => m.movementType.toLowerCase() === 'salida');
-    const ajustes = movements.filter((m) => m.movementType.toLowerCase() === 'ajuste');
+    const entradas = movements.filter((m) => m.movement_Type?.toLowerCase() === 'entrada');
+    const salidas = movements.filter((m) => m.movement_Type?.toLowerCase() === 'salida');
+    const ajustes = movements.filter((m) => m.movement_Type?.toLowerCase() === 'ajuste');
 
     const stats = [
         {
@@ -94,17 +94,17 @@ const Dashboard: React.FC = () => {
                         <div className="space-y-3">
                             {recentMovements.map((movement) => (
                                 <div
-                                    key={movement.movementId}
+                                    key={movement.movement_ID}
                                     className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="font-mono text-sm text-muted-foreground">
-                                            #{movement.movementId}
+                                            #{movement.movement_ID}
                                         </div>
                                         <div>
-                                            <p className="font-medium">Producto #{movement.itemId}</p>
+                                            <p className="font-medium">Producto #{movement.iteM_ID}</p>
                                             <p className="text-sm text-muted-foreground">
-                                                {movement.movementType} - {movement.quantity} unidades
+                                                {movement.movement_Type} - {movement.quantity} unidades
                                             </p>
                                         </div>
                                     </div>
