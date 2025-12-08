@@ -111,7 +111,7 @@ const Movements: React.FC = () => {
                 </CardHeader>
                 <CardContent className="p-0">
                     <MovementTable
-                        movements={movements}
+                        movements={[...movements].sort((a, b) => b.movement_ID - a.movement_ID)}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onView={handleView}
