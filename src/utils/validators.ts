@@ -9,8 +9,8 @@ export const movementSchema = z.object({
     movementType: z.string()
         .min(1, "El tipo de movimiento es requerido")
         .refine(
-            (val) => ["entrada", "salida", "ajuste"].includes(val.toLowerCase()),
-            "Tipo de movimiento inválido. Debe ser: entrada, salida o ajuste"
+            (val) => ["entrada", "salida"].includes(val.toLowerCase()),
+            "Tipo de movimiento inválido. Debe ser: Entrada o Salida"
         ),
 
     quantity: z.coerce

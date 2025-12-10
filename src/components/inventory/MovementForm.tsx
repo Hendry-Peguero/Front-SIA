@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { movementSchema, type MovementFormValues } from '../../utils/validators';
-import { InventoryMovementDto, InventoryMovementSaveDto } from '../../types/inventory.types';
+import { InventoryMovementDto, InventoryMovementSaveDto, AdjustInventoryDto } from '../../types/inventory.types';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -14,7 +14,8 @@ import { useToast } from '../../context/ToastContext';
 import { Scan } from 'lucide-react';
 
 interface MovementFormProps {
-    onSubmit: (data: InventoryMovementSaveDto) => Promise<void>;
+    // onSubmit can receive either SaveDto (for edits) or AdjustInventoryDto (for new entries)
+    onSubmit: (data: any) => Promise<void>;
     onCancel: () => void;
     initialData?: InventoryMovementDto;
     loading?: boolean;
@@ -29,6 +30,7 @@ const MovementForm: React.FC<MovementFormProps> = ({
     const { userId } = useAuth();
     const { addToast } = useToast();
     const [items, setItems] = React.useState<ItemInformationDto[]>([]);
+    const [selectedItemObj, setSelectedItemObj] = React.useState<ItemInformationDto | null>(null);
     const [loadingItems, setLoadingItems] = React.useState(false);
     const [searchTerm, setSearchTerm] = React.useState('');
     const [showDropdown, setShowDropdown] = React.useState(false);
@@ -97,6 +99,7 @@ const MovementForm: React.FC<MovementFormProps> = ({
         setSearchTerm(item.itemName);
         setShowDropdown(false);
         setValue('itemId', item.iteM_ID);
+        setSelectedItemObj(item);
     };
 
     const handleBarcodeSearch = async (barcode: string) => {
@@ -160,23 +163,53 @@ const MovementForm: React.FC<MovementFormProps> = ({
             return;
         }
 
-        if (!data.itemId || data.itemId === 0) {
-            console.error('No item selected');
-            addToast('Por favor, selecciona un producto válido.', 'error');
-            return;
+        if (!selectedItemObj && !initialData) {
+            // Try to find the item in local list if not explicitly selected but ID is present (e.g. typed)
+            const found = items.find(i => i.iteM_ID === Number(data.itemId));
+            if (!found) {
+                console.error('No item object found to retrieve warehouseID');
+                addToast('Por favor, selecciona un producto válido de la lista.', 'error');
+                return;
+            }
+            setSelectedItemObj(found);
         }
 
-        const saveDto: InventoryMovementSaveDto = {
-            iteM_ID: Number(data.itemId),
-            movement_Type: data.movementType,
-            quantity: Number(data.quantity),
-            movement_Date: new Date(data.movementDate as string).toISOString(),
-            reason: data.reason || null,
-            createdBy: userId,
-        };
+        // Determine if creating (Adjust) or Updating
+        if (!initialData) {
+            // New Movement -> Use AdjustInventoryDto
+            const itemToUse = selectedItemObj || items.find(i => i.iteM_ID === Number(data.itemId));
 
-        console.log('Submitting movement data:', saveDto);
-        await onSubmit(saveDto);
+            if (!itemToUse) {
+                addToast('Error interno: No se pudo obtener información del producto (WarehouseID)', 'error');
+                return;
+            }
+
+            const adjustDto: AdjustInventoryDto = {
+                iteM_ID: Number(data.itemId),
+                movement_Type: data.movementType, // "Entrada" or "Salida"
+                quantity: Number(data.quantity),
+                warehouseID: itemToUse.warehouseID,
+                shelF_ID: 1, // Fixed value as per requirement
+                createdBy: userId,
+                reason: data.reason || "null"
+            };
+            console.log('Submitting ADJUST data:', adjustDto);
+            await onSubmit(adjustDto);
+
+        } else {
+            // Edit -> Use InventoryMovementSaveDto (Legacy/Standard)
+            const saveDto: InventoryMovementSaveDto = {
+                iteM_ID: Number(data.itemId),
+                movement_Type: data.movementType,
+                quantity: Number(data.quantity),
+                movement_Date: new Date(data.movementDate as string).toISOString(),
+                reason: data.reason || "null",
+                createdBy: userId,
+            };
+
+            console.log('Submitting UPDATE data:', saveDto);
+            await onSubmit(saveDto);
+        }
     };
 
     return (
@@ -258,9 +291,8 @@ const MovementForm: React.FC<MovementFormProps> = ({
                         disabled={loading}
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        <option value="entrada">Entrada</option>
-                        <option value="salida">Salida</option>
-                        <option value="ajuste">Ajuste</option>
+                        <option value="Entrada">Entrada</option>
+                        <option value="Salida">Salida</option>
                     </select>
                     {errors.movementType && (
                         <p className="text-sm text-destructive">{errors.movementType.message}</p>

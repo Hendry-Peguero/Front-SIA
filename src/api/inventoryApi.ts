@@ -1,5 +1,5 @@
 import apiClient from './axiosConfig';
-import { InventoryMovementDto, InventoryMovementSaveDto } from '../types/inventory.types';
+import { InventoryMovementDto, InventoryMovementSaveDto, AdjustInventoryDto } from '../types/inventory.types';
 
 /**
  * API service for inventory movements
@@ -42,5 +42,13 @@ export const inventoryApi = {
      */
     delete: async (id: number): Promise<void> => {
         await apiClient.delete(`/InventoryMovements/${id}`);
+    },
+
+    /**
+     * Adjust inventory (Entrada/Salida) using the new dedicated endpoint
+     */
+    adjustInventory: async (data: AdjustInventoryDto): Promise<{ message: string }> => {
+        const response = await apiClient.post<{ message: string }>('/InventoryMovements/adjust-inventory', data);
+        return response.data;
     },
 };

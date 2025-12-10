@@ -61,7 +61,8 @@ const ItemForm: React.FC<ItemFormProps> = ({
             ? (() => {
                 console.log('Raw Initial Data:', initialData);
                 const vatApp = initialData.vaT_Applicable;
-                const isVatTrue = vatApp === "1" || vatApp === true || vatApp === 1 || vatApp === "true";
+                // Check if it's true, 1, "1", "true", or "Y" (case insensitive)
+                const isVatTrue = vatApp === true || vatApp === 1 || String(vatApp) === "1" || String(vatApp).toLowerCase() === "true" || String(vatApp).toUpperCase() === "Y";
                 console.log('Parsed VAT Applicable:', { raw: vatApp, isTrue: isVatTrue });
 
                 return {
@@ -308,7 +309,7 @@ const ItemForm: React.FC<ItemFormProps> = ({
             grouP_ID: finalGroupId || 0,
             barcode: data.barcode || '',
             reorderPoint: data.reorderPoint || 0,
-            vaT_Applicable: data.vatApplicable ? "1" : "0", // Convert boolean to "1"/"0"
+            vaT_Applicable: data.vatApplicable ? "Y" : "N", // Convert boolean to "Y"/"N"
             warehouseID: data.warehouseId || 0,
             photoFileName: data.photoFileName || '',
             barcode2: data.barcode2 || '',

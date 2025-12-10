@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
-import { InventoryMovementDto, InventoryMovementSaveDto } from '../types/inventory.types';
+import { InventoryMovementDto, InventoryMovementSaveDto, AdjustInventoryDto } from '../types/inventory.types';
 import MovementTable from '../components/inventory/MovementTable';
 import MovementForm from '../components/inventory/MovementForm';
-import DeleteConfirmation from '../components/inventory/DeleteConfirmation';
 import MovementDetail from '../components/inventory/MovementDetail';
 import { Modal } from '../components/ui/modal';
 import { Button } from '../components/ui/button';
@@ -13,7 +12,7 @@ import { Plus, RefreshCw } from 'lucide-react';
 type ModalState = 'create' | 'edit' | 'delete' | 'view' | null;
 
 const Movements: React.FC = () => {
-    const { movements, loading, createMovement, updateMovement, deleteMovement, fetchMovements } = useInventory();
+    const { movements, loading, adjustInventory, fetchMovements } = useInventory();
     const [modalState, setModalState] = useState<ModalState>(null);
     const [selectedMovement, setSelectedMovement] = useState<InventoryMovementDto | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
@@ -23,55 +22,23 @@ const Movements: React.FC = () => {
         setModalState('create');
     };
 
-    const handleEdit = (movement: InventoryMovementDto) => {
-        setSelectedMovement(movement);
-        setModalState('edit');
-    };
-
-    const handleDelete = (movementId: number) => {
-        const movement = movements.find((m) => m.movement_ID === movementId);
-        if (movement) {
-            setSelectedMovement(movement);
-            setModalState('delete');
-        }
-    };
-
     const handleView = (movement: InventoryMovementDto) => {
         setSelectedMovement(movement);
         setModalState('view');
     };
 
-    const handleSubmitCreate = async (data: InventoryMovementSaveDto) => {
+    const handleSubmitCreate = async (data: any) => {
+        // data will be AdjustInventoryDto
         setActionLoading(true);
         try {
-            await createMovement(data);
+            await adjustInventory(data as AdjustInventoryDto);
             setModalState(null);
         } finally {
             setActionLoading(false);
         }
     };
 
-    const handleSubmitEdit = async (data: InventoryMovementSaveDto) => {
-        if (!selectedMovement) return;
-        setActionLoading(true);
-        try {
-            await updateMovement(selectedMovement.movement_ID, data);
-            setModalState(null);
-        } finally {
-            setActionLoading(false);
-        }
-    };
 
-    const handleConfirmDelete = async () => {
-        if (!selectedMovement) return;
-        setActionLoading(true);
-        try {
-            await deleteMovement(selectedMovement.movement_ID);
-            setModalState(null);
-        } finally {
-            setActionLoading(false);
-        }
-    };
 
     const handleCloseModal = () => {
         if (!actionLoading) {
@@ -112,8 +79,6 @@ const Movements: React.FC = () => {
                 <CardContent className="p-0">
                     <MovementTable
                         movements={[...movements].sort((a, b) => b.movement_ID - a.movement_ID)}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
                         onView={handleView}
                         loading={loading}
                     />
@@ -134,38 +99,7 @@ const Movements: React.FC = () => {
                 />
             </Modal>
 
-            {/* Edit Modal */}
-            <Modal
-                isOpen={modalState === 'edit'}
-                onClose={handleCloseModal}
-                title="Editar Movimiento"
-                description="Modifica los datos del movimiento"
-            >
-                {selectedMovement && (
-                    <MovementForm
-                        onSubmit={handleSubmitEdit}
-                        onCancel={handleCloseModal}
-                        initialData={selectedMovement}
-                        loading={actionLoading}
-                    />
-                )}
-            </Modal>
 
-            {/* Delete Modal */}
-            <Modal
-                isOpen={modalState === 'delete'}
-                onClose={handleCloseModal}
-                title=""
-            >
-                {selectedMovement && (
-                    <DeleteConfirmation
-                        movementId={selectedMovement.movement_ID}
-                        onConfirm={handleConfirmDelete}
-                        onCancel={handleCloseModal}
-                        loading={actionLoading}
-                    />
-                )}
-            </Modal>
 
             {/* View Modal */}
             <Modal

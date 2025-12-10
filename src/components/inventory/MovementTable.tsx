@@ -3,21 +3,17 @@ import { InventoryMovementDto } from '../../types/inventory.types';
 import { formatDate, formatNumber, getMovementTypeColor, getMovementTypeLabel } from '../../utils/formatters';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
-import { Edit, Trash2, Eye, Pencil } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 interface MovementTableProps {
     movements: InventoryMovementDto[];
-    onEdit: (movement: InventoryMovementDto) => void;
-    onDelete: (movementId: number) => void;
     onView: (movement: InventoryMovementDto) => void;
     loading?: boolean;
 }
 
 const MovementTable: React.FC<MovementTableProps> = ({
     movements,
-    onEdit,
-    onDelete,
     onView,
     loading = false,
 }) => {
@@ -66,17 +62,7 @@ const MovementTable: React.FC<MovementTableProps> = ({
                                     <Button variant="ghost" size="sm" onClick={() => onView(movement)} className="h-6 w-6 p-0">
                                         <Eye className="h-3 w-3" />
                                     </Button>
-                                    <Button variant="ghost" size="sm" onClick={() => onEdit(movement)} className="h-6 w-6 p-0">
-                                        <Pencil className="h-3 w-3" />
-                                    </Button>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => onDelete(movement.movement_ID)}
-                                        className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                                    >
-                                        <Trash2 className="h-3 w-3" />
-                                    </Button>
+
                                 </div>
                             </div>
 
@@ -164,24 +150,6 @@ const MovementTable: React.FC<MovementTableProps> = ({
                                             className="h-7 w-7 p-0"
                                         >
                                             <Eye className="h-3 w-3" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => onEdit(movement)}
-                                            title="Editar"
-                                            className="h-7 w-7 p-0"
-                                        >
-                                            <Edit className="h-3 w-3" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => onDelete(movement.movement_ID)}
-                                            title="Eliminar"
-                                            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                                        >
-                                            <Trash2 className="h-3 w-3" />
                                         </Button>
                                     </div>
                                 </td>

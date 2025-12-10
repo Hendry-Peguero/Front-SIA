@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { InventoryMovementDto, InventoryMovementSaveDto } from '../types/inventory.types';
+import { InventoryMovementDto, InventoryMovementSaveDto, AdjustInventoryDto } from '../types/inventory.types';
 import { inventoryApi } from '../api/inventoryApi';
 import { useToast } from './ToastContext';
 
@@ -9,6 +9,7 @@ interface InventoryContextType {
     error: string | null;
     fetchMovements: () => Promise<void>;
     createMovement: (data: InventoryMovementSaveDto) => Promise<void>;
+    adjustInventory: (data: AdjustInventoryDto) => Promise<void>;
     updateMovement: (id: number, data: InventoryMovementSaveDto) => Promise<void>;
     deleteMovement: (id: number) => Promise<void>;
     getMovementById: (id: number) => Promise<InventoryMovementDto | undefined>;
@@ -62,6 +63,27 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             setLoading(false);
         }
     }, [addToast]);
+
+    const adjustInventory = useCallback(async (data: AdjustInventoryDto) => {
+        setLoading(true);
+        console.log('🚀 Sending payload to /adjust-inventory:', JSON.stringify(data, null, 2));
+        try {
+            await inventoryApi.adjustInventory(data);
+            // Since the endpoint doesn't return the created movement, we should fetch list again or just notify
+            // User requirement said "response body: { message: ... }"
+            // Ideally we re-fetch movements to show the new one
+            await fetchMovements();
+            addToast('Inventario ajustado correctamente', 'success');
+        } catch (err: any) {
+            console.error('Error adjusting inventory:', err);
+            // Check for 'error' field specifically as per user report, fallback to 'message' or generic
+            const msg = err.response?.data?.error || err.response?.data?.message || err.message || 'Error al ajustar inventario';
+            addToast(msg, 'error');
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, [addToast, fetchMovements]);
 
     const updateMovement = useCallback(async (id: number, data: InventoryMovementSaveDto) => {
         setLoading(true);
@@ -125,6 +147,7 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 error,
                 fetchMovements,
                 createMovement,
+                adjustInventory,
                 updateMovement,
                 deleteMovement,
                 getMovementById,
