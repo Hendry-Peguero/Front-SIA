@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useItems } from '../context/ItemContext';
 import { ItemInformationDto, SaveItemInformationDto } from '../types/item.types';
 import ItemTable from '../components/items/ItemTable';
@@ -7,8 +7,9 @@ import DeleteItemConfirmation from '../components/items/DeleteItemConfirmation';
 import ItemDetail from '../components/items/ItemDetail';
 import { Modal } from '../components/ui/modal';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw, Search } from 'lucide-react';
 
 type ModalState = 'create' | 'edit' | 'delete' | 'view' | null;
 
@@ -17,6 +18,28 @@ const Items: React.FC = () => {
     const [modalState, setModalState] = useState<ModalState>(null);
     const [selectedItem, setSelectedItem] = useState<ItemInformationDto | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Filter items based on search term
+    const filteredItems = useMemo(() => {
+        if (!searchTerm.trim()) {
+            return items;
+        }
+
+        const searchLower = searchTerm.toLowerCase().trim();
+        return items.filter(item =>
+            // Search by ID
+            item.iteM_ID.toString().includes(searchLower) ||
+            // Search by name
+            item.itemName.toLowerCase().includes(searchLower) ||
+            // Search by barcode
+            item.barcode?.toLowerCase().includes(searchLower) ||
+            // Search by barcode2
+            item.barcode2?.toLowerCase().includes(searchLower) ||
+            // Search by barcode3
+            item.barcode3?.toLowerCase().includes(searchLower)
+        );
+    }, [items, searchTerm]);
 
     const handleCreate = () => {
         setSelectedItem(null);
@@ -105,13 +128,34 @@ const Items: React.FC = () => {
                 </div>
             </div>
 
+            {/* Search Bar */}
+            <Card>
+                <CardContent className="pt-6">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            type="text"
+                            placeholder="Buscar por ID, nombre o código de barras..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10"
+                        />
+                    </div>
+                    {searchTerm && (
+                        <p className="text-sm text-muted-foreground mt-2">
+                            {filteredItems.length} {filteredItems.length === 1 ? 'resultado encontrado' : 'resultados encontrados'}
+                        </p>
+                    )}
+                </CardContent>
+            </Card>
+
             <Card>
                 <CardHeader>
                     <CardTitle>Lista de Artículos</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                     <ItemTable
-                        items={[...items].sort((a, b) => b.iteM_ID - a.iteM_ID)}
+                        items={[...filteredItems].sort((a, b) => b.iteM_ID - a.iteM_ID)}
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onView={handleView}

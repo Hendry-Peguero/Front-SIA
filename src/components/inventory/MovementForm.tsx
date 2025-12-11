@@ -261,7 +261,7 @@ const MovementForm: React.FC<MovementFormProps> = ({
                                             <div className="font-medium">{item.itemName}</div>
                                             <div className="flex justify-between text-xs text-muted-foreground">
                                                 <span>ID: {item.iteM_ID}</span>
-                                                <span>Stock: {item.barcode}</span>
+                                                <span>Código de Barra: {item.barcode}</span>
                                             </div>
                                         </div>
                                     ))}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
+import { useItems } from '../context/ItemContext';
 import { InventoryMovementDto, InventoryMovementSaveDto, AdjustInventoryDto } from '../types/inventory.types';
 import MovementTable from '../components/inventory/MovementTable';
 import MovementForm from '../components/inventory/MovementForm';
@@ -13,6 +14,7 @@ type ModalState = 'create' | 'edit' | 'delete' | 'view' | null;
 
 const Movements: React.FC = () => {
     const { movements, loading, adjustInventory, fetchMovements } = useInventory();
+    const { items } = useItems();
     const [modalState, setModalState] = useState<ModalState>(null);
     const [selectedMovement, setSelectedMovement] = useState<InventoryMovementDto | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
@@ -79,6 +81,7 @@ const Movements: React.FC = () => {
                 <CardContent className="p-0">
                     <MovementTable
                         movements={[...movements].sort((a, b) => b.movement_ID - a.movement_ID)}
+                        items={items}
                         onView={handleView}
                         loading={loading}
                     />

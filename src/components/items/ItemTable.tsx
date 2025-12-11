@@ -1,7 +1,7 @@
 import React from 'react';
 import { ItemInformationDto } from '../../types/item.types';
 import { Button } from '../ui/button';
-import { Eye, Edit, Trash2 } from 'lucide-react';
+import { Eye, Edit, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { GRUPOS_MOCK } from '../../data/mockData';
 
 interface ItemTableProps {
@@ -19,6 +19,20 @@ const ItemTable: React.FC<ItemTableProps> = ({
     onView,
     loading = false,
 }) => {
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const itemsPerPage = 15;
+
+    // Calculate pagination
+    const totalPages = Math.ceil(items.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentItems = items.slice(startIndex, endIndex);
+
+    // Reset to page 1 when items change
+    React.useEffect(() => {
+        setCurrentPage(1);
+    }, [items.length]);
+
     // Helper function to get group name
     const getGroupName = (groupId: number) => {
         const group = GRUPOS_MOCK.find(g => g.id === groupId);
@@ -49,7 +63,7 @@ const ItemTable: React.FC<ItemTableProps> = ({
     }
 
     return (
-        <>
+        <div className="space-y-4">
             {/* Desktop Table */}
             <div className="hidden md:block overflow-x-auto">
                 <table className="w-full">
@@ -66,7 +80,7 @@ const ItemTable: React.FC<ItemTableProps> = ({
                         </tr>
                     </thead>
                     <tbody>
-                        {items.map((item) => (
+                        {currentItems.map((item) => (
                             <tr key={item.iteM_ID} className="border-b hover:bg-muted/50">
                                 <td className="p-4">{item.iteM_ID}</td>
                                 <td className="p-4 font-medium">{item.itemName}</td>
@@ -118,7 +132,7 @@ const ItemTable: React.FC<ItemTableProps> = ({
 
             {/* Mobile Cards */}
             <div className="md:hidden space-y-4 p-4">
-                {items.map((item) => (
+                {currentItems.map((item) => (
                     <div
                         key={item.iteM_ID}
                         className="border rounded-lg p-4 space-y-3 hover:shadow-md transition-shadow"
@@ -186,7 +200,61 @@ const ItemTable: React.FC<ItemTableProps> = ({
                     </div>
                 ))}
             </div>
-        </>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between px-2 py-3 border-t">
+                    <div className="text-sm text-muted-foreground">
+                        Mostrando {startIndex + 1} a {Math.min(endIndex, items.length)} de {items.length} artículos
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(1)}
+                            disabled={currentPage === 1}
+                            className="h-8 w-8 p-0"
+                            title="Primera página"
+                        >
+                            <ChevronsLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            className="h-8 w-8 p-0"
+                            title="Página anterior"
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <div className="text-sm font-medium px-3">
+                            Página {currentPage} de {totalPages}
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                            className="h-8 w-8 p-0"
+                            title="Página siguiente"
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(totalPages)}
+                            disabled={currentPage === totalPages}
+                            className="h-8 w-8 p-0"
+                            title="Última página"
+                        >
+                            <ChevronsRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
 

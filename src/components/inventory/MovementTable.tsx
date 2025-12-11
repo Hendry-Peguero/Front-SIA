@@ -1,22 +1,45 @@
 import React from 'react';
 import { InventoryMovementDto } from '../../types/inventory.types';
+import { ItemInformationDto } from '../../types/item.types';
 import { formatDate, formatNumber, getMovementTypeColor, getMovementTypeLabel } from '../../utils/formatters';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
-import { Eye } from 'lucide-react';
+import { Eye, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 interface MovementTableProps {
     movements: InventoryMovementDto[];
+    items?: ItemInformationDto[];
     onView: (movement: InventoryMovementDto) => void;
     loading?: boolean;
 }
 
 const MovementTable: React.FC<MovementTableProps> = ({
     movements,
+    items = [],
     onView,
     loading = false,
 }) => {
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const itemsPerPage = 10;
+
+    // Helper function to get item name by ID
+    const getItemName = (itemId: number): string => {
+        const item = items.find(i => i.iteM_ID === itemId);
+        return item ? item.itemName : `ID: ${itemId}`;
+    };
+
+    // Calculate pagination
+    const totalPages = Math.ceil(movements.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentMovements = movements.slice(startIndex, endIndex);
+
+    // Reset to page 1 when movements change
+    React.useEffect(() => {
+        setCurrentPage(1);
+    }, [movements.length]);
+
     if (loading) {
         return (
             <div className="flex items-center justify-center p-12">
@@ -37,10 +60,10 @@ const MovementTable: React.FC<MovementTableProps> = ({
     }
 
     return (
-        <>
+        <div className="space-y-4">
             {/* Mobile View: Cards */}
             <div className="sm:hidden space-y-2 w-full overflow-x-hidden">
-                {movements.map((movement) => (
+                {currentMovements.map((movement) => (
                     <Card key={movement.movement_ID} className="p-3 w-full">
                         <div className="space-y-2">
                             {/* Header Row: ID + Badge + Actions */}
@@ -72,7 +95,7 @@ const MovementTable: React.FC<MovementTableProps> = ({
                                 <div className="space-y-1">
                                     <div>
                                         <span className="text-muted-foreground text-[10px]">Producto: </span>
-                                        <span className="font-medium text-primary">#{movement.iteM_ID}</span>
+                                        <span className="font-medium text-primary">{getItemName(movement.iteM_ID)}</span>
                                     </div>
                                     <div>
                                         <span className="text-muted-foreground text-[10px]">Fecha: </span>
@@ -108,7 +131,7 @@ const MovementTable: React.FC<MovementTableProps> = ({
                     <thead>
                         <tr className="border-b bg-muted/50">
                             <th className="p-2 text-left text-xs font-medium">ID</th>
-                            <th className="p-2 text-left text-xs font-medium">Producto ID</th>
+                            <th className="p-2 text-left text-xs font-medium">Producto</th>
                             <th className="p-2 text-left text-xs font-medium">Tipo</th>
                             <th className="p-2 text-right text-xs font-medium">Cantidad</th>
                             <th className="p-2 text-left text-xs font-medium">Fecha</th>
@@ -118,10 +141,10 @@ const MovementTable: React.FC<MovementTableProps> = ({
                         </tr>
                     </thead>
                     <tbody>
-                        {movements.map((movement) => (
+                        {currentMovements.map((movement) => (
                             <tr key={movement.movement_ID} className="border-b hover:bg-muted/30 transition-colors">
                                 <td className="p-2 text-xs font-medium">{movement.movement_ID}</td>
-                                <td className="p-2 text-xs">{movement.iteM_ID}</td>
+                                <td className="p-2 text-xs font-medium">{getItemName(movement.iteM_ID)}</td>
                                 <td className="p-2">
                                     <span
                                         className={cn(
@@ -158,7 +181,61 @@ const MovementTable: React.FC<MovementTableProps> = ({
                     </tbody>
                 </table>
             </div>
-        </>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between px-2 py-3 border-t">
+                    <div className="text-sm text-muted-foreground">
+                        Mostrando {startIndex + 1} a {Math.min(endIndex, movements.length)} de {movements.length} movimientos
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(1)}
+                            disabled={currentPage === 1}
+                            className="h-8 w-8 p-0"
+                            title="Primera página"
+                        >
+                            <ChevronsLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            className="h-8 w-8 p-0"
+                            title="Página anterior"
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <div className="text-sm font-medium px-3">
+                            Página {currentPage} de {totalPages}
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                            className="h-8 w-8 p-0"
+                            title="Página siguiente"
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(totalPages)}
+                            disabled={currentPage === totalPages}
+                            className="h-8 w-8 p-0"
+                            title="Última página"
+                        >
+                            <ChevronsRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 };
 
