@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Check, ChevronDown, Save, Scan, X } from 'lucide-react';
+import { ChevronDown, Scan } from 'lucide-react';
 import BarcodeScanner from './BarcodeScanner';
 import { itemSchema } from '../../utils/itemValidators';
 import { ItemInformationDto, SaveItemInformationDto, ItemFormValues } from '../../types/item.types';
@@ -62,7 +61,12 @@ const ItemForm: React.FC<ItemFormProps> = ({
                 console.log('Raw Initial Data:', initialData);
                 const vatApp = initialData.vaT_Applicable;
                 // Check if it's true, 1, "1", "true", or "Y" (case insensitive)
-                const isVatTrue = vatApp === true || vatApp === 1 || String(vatApp) === "1" || String(vatApp).toLowerCase() === "true" || String(vatApp).toUpperCase() === "Y";
+                const vatAppStr = String(vatApp);
+                const isVatTrue = (typeof vatApp === 'boolean' && vatApp === true) ||
+                    (typeof vatApp === 'number' && vatApp === 1) ||
+                    vatAppStr === "1" ||
+                    vatAppStr.toLowerCase() === "true" ||
+                    vatAppStr.toUpperCase() === "Y";
                 console.log('Parsed VAT Applicable:', { raw: vatApp, isTrue: isVatTrue });
 
                 return {
@@ -228,18 +232,20 @@ const ItemForm: React.FC<ItemFormProps> = ({
     };
 
     // Update vat ID when search text changes
-    const handleVatSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const text = e.target.value;
-        setVatSearchText(text);
-        setShowVatDropdown(true);
+    // Note: This function is currently unused as the VAT field is read-only
+    // Keeping it for potential future use if we make the field editable
+    // const handleVatSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const text = e.target.value;
+    //     setVatSearchText(text);
+    //     setShowVatDropdown(true);
 
-        const existing = vats.find(v => v.descripcion.toLowerCase() === text.toLowerCase());
-        if (existing) {
-            setValue('vatId', existing.id);
-        } else {
-            setValue('vatId', 0);
-        }
-    };
+    //     const existing = vats.find(v => v.descripcion.toLowerCase() === text.toLowerCase());
+    //     if (existing) {
+    //         setValue('vatId', existing.id);
+    //     } else {
+    //         setValue('vatId', 0);
+    //     }
+    // };
 
     const handleVatSelect = (vat: VatDto) => {
         setVatSearchText(`${vat.descripcion} (${vat.vat}%)`);

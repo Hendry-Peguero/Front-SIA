@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
 import { useItems } from '../context/ItemContext';
-import { InventoryMovementDto, InventoryMovementSaveDto, AdjustInventoryDto } from '../types/inventory.types';
+import { InventoryMovementDto, AdjustInventoryDto } from '../types/inventory.types';
 import MovementTable from '../components/inventory/MovementTable';
 import MovementForm from '../components/inventory/MovementForm';
 import MovementDetail from '../components/inventory/MovementDetail';
