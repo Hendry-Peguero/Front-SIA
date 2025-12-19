@@ -7,11 +7,13 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { Modal } from '../ui/modal';
 import { format } from 'date-fns';
 import { getItems, getItemByBarcode } from '../../api/itemApi';
 import { ItemInformationDto } from '../../types/item.types';
 import { useToast } from '../../context/ToastContext';
 import { Scan } from 'lucide-react';
+import BarcodeScanner from '../items/BarcodeScanner';
 
 interface MovementFormProps {
     // onSubmit can receive either SaveDto (for edits) or AdjustInventoryDto (for new entries)
@@ -34,6 +36,7 @@ const MovementForm: React.FC<MovementFormProps> = ({
     const [loadingItems, setLoadingItems] = React.useState(false);
     const [searchTerm, setSearchTerm] = React.useState('');
     const [showDropdown, setShowDropdown] = React.useState(false);
+    const [showScanner, setShowScanner] = React.useState(false);
     const searchContainerRef = React.useRef<HTMLDivElement>(null);
 
     // Handle click outside to close dropdown
@@ -128,6 +131,17 @@ const MovementForm: React.FC<MovementFormProps> = ({
             // Try barcode search primarily on Enter
             handleBarcodeSearch(searchTerm);
         }
+    };
+
+    const handleScan = (barcode: string) => {
+        setSearchTerm(barcode);
+        setShowScanner(false);
+        // Automatically search for the scanned barcode
+        handleBarcodeSearch(barcode);
+    };
+
+    const openScanner = () => {
+        setShowScanner(true);
     };
 
     const {
@@ -241,9 +255,9 @@ const MovementForm: React.FC<MovementFormProps> = ({
                                 type="button"
                                 variant="outline"
                                 size="icon"
-                                onClick={() => handleBarcodeSearch(searchTerm)}
-                                disabled={loading || !searchTerm}
-                                title="Buscar por código de barras"
+                                onClick={openScanner}
+                                disabled={loading || loadingItems}
+                                title="Escanear código de barras con cámara"
                             >
                                 <Scan className="h-4 w-4" />
                             </Button>
@@ -364,6 +378,18 @@ const MovementForm: React.FC<MovementFormProps> = ({
                     {loading ? 'Guardando...' : initialData ? 'Actualizar' : 'Crear'}
                 </Button>
             </div>
+
+            {/* Barcode Scanner Modal */}
+            <Modal
+                isOpen={showScanner}
+                onClose={() => setShowScanner(false)}
+                title="Escanear Código de Barras"
+            >
+                <BarcodeScanner
+                    onScan={handleScan}
+                    onClose={() => setShowScanner(false)}
+                />
+            </Modal>
         </form >
     );
 };
