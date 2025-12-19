@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Html5Qrcode } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { Button } from '../ui/button';
 import { Camera, X, Scan } from 'lucide-react';
 
@@ -52,9 +52,17 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose }) => {
                 {
                     fps: 10,
                     qrbox: { width: 250, height: 250 },
-                },
+                    formatsToSupport: [
+                        Html5QrcodeSupportedFormats.QR_CODE,
+                        Html5QrcodeSupportedFormats.CODE_39,
+                        Html5QrcodeSupportedFormats.CODE_128,
+                        Html5QrcodeSupportedFormats.EAN_13,
+                        Html5QrcodeSupportedFormats.UPC_A,
+                    ],
+                } as any, // Type assertion needed due to outdated type definitions
                 (decodedText) => {
                     // Success callback
+                    console.log(`Código detectado: ${decodedText}`);
                     onScan(decodedText);
                     stopScanning();
                 },
