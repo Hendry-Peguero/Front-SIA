@@ -29,6 +29,21 @@ export const useToast = () => {
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [toasts, setToasts] = useState<Toast[]>([]);
 
+    // Listen for showToast events from axios interceptor
+    React.useEffect(() => {
+        const handleShowToast = (event: Event) => {
+            const customEvent = event as CustomEvent<{ message: string; type: ToastType }>;
+            if (customEvent.detail) {
+                addToast(customEvent.detail.message, customEvent.detail.type);
+            }
+        };
+
+        window.addEventListener('showToast', handleShowToast);
+        return () => {
+            window.removeEventListener('showToast', handleShowToast);
+        };
+    }, []);
+
     const removeToast = useCallback((id: string) => {
         setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, []);

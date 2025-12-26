@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // Get API base URL from environment variables or current hostname
 const getApiBaseUrl = () => {
@@ -22,6 +22,9 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
+// Log API configuration on initialization
+console.log('🔧 Axios Config - API Base URL:', API_BASE_URL);
+
 // Create axios instance with base configuration
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
@@ -33,14 +36,14 @@ const apiClient = axios.create({
 
 // Request interceptor - Add JWT token to all requests
 apiClient.interceptors.request.use(
-    (config) => {
+    (config: InternalAxiosRequestConfig) => {
         const token = localStorage.getItem('token');
-        if (token) {
+        if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },
-    (error) => {
+    (error: AxiosError) => {
         return Promise.reject(error);
     }
 );
@@ -53,26 +56,85 @@ apiClient.interceptors.response.use(
     (error: AxiosError) => {
         // Handle common errors
         if (error.response) {
-            // Server responded with error status
-            console.error('API Error:', error.response.status, error.response.data);
+            const status = error.response.status;
+            const errorData = error.response.data as { message?: string };
 
-            // Handle 401 Unauthorized - Token expired or invalid
-            if (error.response.status === 401) {
-                console.warn('Authentication failed - redirecting to login');
-                localStorage.removeItem('token');
-                localStorage.removeItem('userName');
-                // Redirect to login page
-                window.location.href = '/login';
+            // Log error for debugging
+            console.error('❌ API Error:', {
+                status,
+                url: error.config?.url,
+                method: error.config?.method,
+                data: errorData
+            });
+
+            // Handle different status codes
+            switch (status) {
+                case 400:
+                    // Bad Request - Invalid data sent
+                    showToast('Datos inválidos.  Por favor verifica la información.', 'error');
+                    break;
+
+                case 401:
+                    // Unauthorized - Token expired or invalid
+                    console.warn('⚠️ Authentication failed - redirecting to login');
+                    showToast('Sesión expirada. Por favor inicia sesión nuevamente.', 'error');
+                    // Clear user data
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userId');
+                    // Redirect to login
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
+                    break;
+
+                case 403:
+                    // Forbidden - User doesn't have permissions
+                    showToast('No tienes permisos para realizar esta acción.', 'error');
+                    break;
+
+                case 404:
+                    // Not Found - Resource doesn't exist
+                    showToast('Recurso no encontrado.', 'error');
+                    break;
+
+                case 500:
+                case 502:
+                case 503:
+                    // Server Error
+                    showToast('Error del servidor. Por favor intenta nuevamente más tarde.', 'error');
+                    break;
+
+                default:
+                    // Generic error
+                    const message = errorData?.message || 'Ha ocurrido un error inesperado.';
+                    showToast(message, 'error');
             }
         } else if (error.request) {
             // Request made but no response
-            console.error('Network Error: No response from server');
+            console.error('❌ Network Error: No response from server');
+            showToast('Error de conexión. Verifica tu conexión a internet.', 'error');
         } else {
             // Something else happened
-            console.error('Error:', error.message);
+            console.error('❌ Error:', error.message);
+            showToast('Error inesperado. Por favor intenta nuevamente.', 'error');
         }
+
         return Promise.reject(error);
     }
 );
 
+/**
+ * Helper function to show toasts
+ * This function safely interacts with the Toast system
+ */
+function showToast(message: string, type: 'success' | 'error' | 'info' | 'warning') {
+    // Try to dispatch custom event that ToastContext can listen to
+    const event = new CustomEvent('showToast', {
+        detail: { message, type }
+    });
+    window.dispatchEvent(event);
+}
+
 export default apiClient;
+
